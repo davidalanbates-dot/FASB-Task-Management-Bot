@@ -1,0 +1,13 @@
+{
+  "name": "fasb-task-management-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Timeline and task management for FASB Accounting Standards Updates",
+  "scripts": {
+    "install:all": "npm install --prefix server && npm install --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "dev": "npm run dev:server & npm run dev:client",
+    "build": "npm run build --prefix client"
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "asus": [
+    {
+      "id": "asu-2014-09",
+      "number": "2014-09",
+      "title": "Revenue from Contracts with Customers",
+      "topic": "Topic 606",
+      "summary": "Establishes a single, comprehensive revenue recognition model for all contracts with customers, replacing industry-specific guidance.",
+      "publicEffectiveDate": "2017-12-15",
+      "otherEffectiveDate": "2018-12-15",
+      "url": "https://fasb.org/page/PageContent?pageId=/standards/accountingstandardsupdates.html",
+      "tags": [
+        "revenue recognition"
+      ]
+    },
+    {
+      "id": "asu-2016-02",
+      "number": "2016-02",
+      "title": "Leases",
+      "topic": "Topic 842",
+      "summary": "Requires lessees to recognize right-of-use assets and lease liabilities on the balance sheet for most leases.",
+      "publicEffectiveDate": "2018-12-15",
+      "otherEffectiveDate": "2021-12-15",
+      "url": "https://fasb.org/page/PageContent?pageId=/standards/accountingstandardsupdates.html",
+      "tags": [
+        "leases"
+      ]
+    },
+    {
+      "id": "asu-2016-13",
+      "number": "2016-13",
+      "title": "Financial Instruments - Credit Losses: Measurement of Credit Losses on Financial Instruments (CECL)",
+      "topic": "Topic 326",
+      "summary": "Replaces the incurred loss model with a current expected credit losses (CECL) model for financial assets measured at amortized cost.",
+      "publicEffectiveDate": "2019-12-15",
+      "otherEffectiveDate": "2022-12-15",
+      "url": "https://fasb.org/page/PageContent?pageId=/standards/accountingstandardsupdates.html",
+      "tags": [
+        "financial instruments",
+        "credit losses"
+      ]
+    },
+    {
+      "id": "asu-2020-06",
+      "number": "2020-06",
+      "title": "Debt - Debt with Conversion and Other Options and Derivatives and Hedging - Contracts in Entity's Own Equity",
+      "topic": "Topic 470-20 / 815-40",
+      "summary": "Simplifies accounting for convertible instruments and the derivatives scope exception for contracts in an entity's own equity.",
+      "publicEffectiveDate": "2021-12-15",
+      "otherEffectiveDate": "2023-12-15",
+      "url": "https://fasb.org/page/PageContent?pageId=/standards/accountingstandardsupdates.html",
+      "tags": [
+        "debt",
+        "derivatives"
+      ]
+    },
+    {
+      "id": "asu-2022-03",
+      "number": "2022-03",
+      "title": "Fair Value Measurement of Equity Securities Subject to Contractual Sale Restrictions",
+      "topic": "Topic 820",
+      "summary": "Clarifies that a contractual restriction on the sale of an equity security is not considered in measuring fair value.",
+      "publicEffectiveDate": "2023-12-15",
+      "otherEffectiveDate": "2024-12-15",
+      "url": "https://fasb.org/page/PageContent?pageId=/standards/accountingstandardsupdates.html",
+      "tags": [
+        "fair value"
+      ]
+    },
+    {
+      "id": "asu-2023-07",
+      "number": "2023-07",
+      "title": "Segment Reporting: Improvements to Reportable Segment Disclosures",
+      "topic": "Topic 280",
+      "summary": "Requires enhanced disclosures about significant segment expenses, primarily through interim and annual disclosure requirements.",
+      "publicEffectiveDate": "2023-12-15",
+      "otherEffectiveDate": "2023-12-15",
+      "url": "https://fasb.org/page/PageContent?pageId=/standards/accountingstandardsupdates.html",
+      "tags": [
+        "segment reporting",
+        "disclosures"
+      ]
+    },
+    {
+      "id": "asu-2023-09",
+      "number": "2023-09",
+      "title": "Income Taxes: Improvements to Income Tax Disclosures",
+      "topic": "Topic 740",
+      "summary": "Requires disaggregated disclosure of the effective tax rate reconciliation and income taxes paid by jurisdiction.",
+      "publicEffectiveDate": "2024-12-15",
+      "otherEffectiveDate": "2025-12-15",
+      "url": "https://fasb.org/page/PageContent?pageId=/standards/accountingstandardsupdates.html",
+      "tags": [
+        "income taxes",
+        "disclosures"
+      ]
+    },
+    {
+      "id": "asu-2024-03",
+      "number": "2024-03",
+      "title": "Income Statement - Reporting Comprehensive Income - Expense Disaggregation Disclosures (DISE)",
+      "topic": "Topic 220-40",
+      "summary": "Requires disaggregation of certain income statement expense captions into specified natural expense categories in the notes.",
+      "publicEffectiveDate": "2026-12-15",
+      "otherEffectiveDate": "2027-12-15",
+      "url": "https://fasb.org/page/PageContent?pageId=/standards/accountingstandardsupdates.html",
+      "tags": [
+        "income statement",
+        "disclosures"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task-seed-1",
+      "asuId": "asu-2023-09",
+      "title": "Inventory current tax rate reconciliation disclosures",
+      "description": "Review existing effective tax rate reconciliation footnote and identify gaps against the new disaggregation categories.",
+      "status": "todo",
+      "priority": "high",
+      "assignee": "",
+      "dueDate": "2026-10-01",
+      "createdAt": "2026-08-27T00:00:00.000Z",
+      "updatedAt": "2026-08-27T00:00:00.000Z"
+    },
+    {
+      "id": "task-seed-2",
+      "asuId": "asu-2024-03",
+      "title": "Map natural expense categories to GL accounts",
+      "description": "Build a crosswalk from existing chart of accounts to the DISE required natural expense categories.",
+      "status": "todo",
+      "priority": "medium",
+      "assignee": "",
+      "dueDate": "2026-11-15",
+      "createdAt": "2026-08-27T00:00:00.000Z",
+      "updatedAt": "2026-08-27T00:00:00.000Z"
+    }
+  ]
+}
