@@ -1,4 +1,5 @@
 {
+  "users": [],
   "asus": [
     {
       "id": "asu-2014-09",
@@ -9,9 +10,7 @@
       "publicEffectiveDate": "2017-12-15",
       "otherEffectiveDate": "2018-12-15",
       "url": "https://fasb.org/page/PageContent?pageId=/standards/accountingstandardsupdates.html",
-      "tags": [
-        "revenue recognition"
-      ]
+      "tags": ["revenue recognition"]
     },
     {
       "id": "asu-2016-02",
@@ -22,9 +21,7 @@
       "publicEffectiveDate": "2018-12-15",
       "otherEffectiveDate": "2021-12-15",
       "url": "https://fasb.org/page/PageContent?pageId=/standards/accountingstandardsupdates.html",
-      "tags": [
-        "leases"
-      ]
+      "tags": ["leases"]
     },
     {
       "id": "asu-2016-13",
@@ -35,10 +32,7 @@
       "publicEffectiveDate": "2019-12-15",
       "otherEffectiveDate": "2022-12-15",
       "url": "https://fasb.org/page/PageContent?pageId=/standards/accountingstandardsupdates.html",
-      "tags": [
-        "financial instruments",
-        "credit losses"
-      ]
+      "tags": ["financial instruments", "credit losses"]
     },
     {
       "id": "asu-2020-06",
@@ -49,10 +43,7 @@
       "publicEffectiveDate": "2021-12-15",
       "otherEffectiveDate": "2023-12-15",
       "url": "https://fasb.org/page/PageContent?pageId=/standards/accountingstandardsupdates.html",
-      "tags": [
-        "debt",
-        "derivatives"
-      ]
+      "tags": ["debt", "derivatives"]
     },
     {
       "id": "asu-2022-03",
@@ -63,9 +54,7 @@
       "publicEffectiveDate": "2023-12-15",
       "otherEffectiveDate": "2024-12-15",
       "url": "https://fasb.org/page/PageContent?pageId=/standards/accountingstandardsupdates.html",
-      "tags": [
-        "fair value"
-      ]
+      "tags": ["fair value"]
     },
     {
       "id": "asu-2023-07",
@@ -76,10 +65,7 @@
       "publicEffectiveDate": "2023-12-15",
       "otherEffectiveDate": "2023-12-15",
       "url": "https://fasb.org/page/PageContent?pageId=/standards/accountingstandardsupdates.html",
-      "tags": [
-        "segment reporting",
-        "disclosures"
-      ]
+      "tags": ["segment reporting", "disclosures"]
     },
     {
       "id": "asu-2023-09",
@@ -90,10 +76,7 @@
       "publicEffectiveDate": "2024-12-15",
       "otherEffectiveDate": "2025-12-15",
       "url": "https://fasb.org/page/PageContent?pageId=/standards/accountingstandardsupdates.html",
-      "tags": [
-        "income taxes",
-        "disclosures"
-      ]
+      "tags": ["income taxes", "disclosures"]
     },
     {
       "id": "asu-2024-03",
@@ -104,33 +87,32 @@
       "publicEffectiveDate": "2026-12-15",
       "otherEffectiveDate": "2027-12-15",
       "url": "https://fasb.org/page/PageContent?pageId=/standards/accountingstandardsupdates.html",
-      "tags": [
-        "income statement",
-        "disclosures"
-      ]
+      "tags": ["income statement", "disclosures"]
     }
   ],
   "tasks": [
     {
-      "id": "task-seed-1",
+      "id": "t0001",
       "asuId": "asu-2023-09",
       "title": "Inventory current tax rate reconciliation disclosures",
       "description": "Review existing effective tax rate reconciliation footnote and identify gaps against the new disaggregation categories.",
       "status": "todo",
       "priority": "high",
-      "assignee": "",
+      "assigneeId": null,
+      "createdById": null,
       "dueDate": "2026-10-01",
       "createdAt": "2026-08-27T00:00:00.000Z",
       "updatedAt": "2026-08-27T00:00:00.000Z"
     },
     {
-      "id": "task-seed-2",
+      "id": "t0002",
       "asuId": "asu-2024-03",
       "title": "Map natural expense categories to GL accounts",
       "description": "Build a crosswalk from existing chart of accounts to the DISE required natural expense categories.",
       "status": "todo",
       "priority": "medium",
-      "assignee": "",
+      "assigneeId": null,
+      "createdById": null,
       "dueDate": "2026-11-15",
       "createdAt": "2026-08-27T00:00:00.000Z",
       "updatedAt": "2026-08-27T00:00:00.000Z"
