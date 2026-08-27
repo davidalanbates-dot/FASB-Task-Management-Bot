@@ -1,0 +1,510 @@
+{
+  "flow": [
+    {
+      "id": 1,
+      "mapper": {},
+      "module": "telegram:WatchUpdates",
+      "version": 1,
+      "metadata": { "designer": { "x": 0, "y": 0 } },
+      "parameters": { "__IMTHOOK__": 2713107 }
+    },
+    {
+      "id": 2,
+      "filter": {
+        "name": "Has text message",
+        "conditions": [[{ "a": "{{1.message.text}}", "o": "exist" }]]
+      },
+      "mapper": {
+        "filter": [
+          [
+            { "a": "chat_id", "b": "{{1.message.chat.id}}", "o": "number:equal" },
+            { "a": "kind", "b": "reminder", "o": "text:notequal" }
+          ]
+        ]
+      },
+      "module": "datastore:SearchRecord",
+      "version": 1,
+      "metadata": { "designer": { "x": 300, "y": 0 } },
+      "parameters": { "datastore": 134897 }
+    },
+    {
+      "id": 3,
+      "mapper": { "fact": "{{2.data.fact}}" },
+      "module": "builtin:BasicAggregator",
+      "version": 1,
+      "metadata": { "designer": { "x": 600, "y": 0 } },
+      "parameters": { "feeder": 2 }
+    },
+    {
+      "id": 15,
+      "mapper": {
+        "filter": [
+          [
+            { "a": "chat_id", "b": "{{1.message.chat.id}}", "o": "number:equal" },
+            { "a": "kind", "b": "reminder", "o": "text:equal" }
+          ]
+        ]
+      },
+      "module": "datastore:SearchRecord",
+      "version": 1,
+      "metadata": { "designer": { "x": 700, "y": 150 } },
+      "parameters": { "datastore": 134897 }
+    },
+    {
+      "id": 16,
+      "mapper": { "entry": "{{15.data.task_id}}: {{15.data.message}} (due {{15.data.due_at}})" },
+      "module": "builtin:BasicAggregator",
+      "version": 1,
+      "metadata": { "designer": { "x": 800, "y": 150 } },
+      "parameters": { "feeder": 15 }
+    },
+    {
+      "id": 40,
+      "mapper": {
+        "key": "{{1.message.chat.id}}",
+        "data": {
+          "chat_id": "{{1.message.chat.id}}",
+          "username": "{{1.message.from.username}}",
+          "last_seen": "{{now}}",
+          "first_name": "{{1.message.from.first_name}}"
+        },
+        "overwrite": true
+      },
+      "module": "datastore:AddRecord",
+      "version": 1,
+      "metadata": { "designer": { "x": 650, "y": 300 } },
+      "parameters": { "datastore": 139287 }
+    },
+    {
+      "id": 41,
+      "mapper": { "filter": [[{ "a": "status", "o": "exist" }]] },
+      "module": "datastore:SearchRecord",
+      "version": 1,
+      "metadata": { "designer": { "x": 750, "y": 300 } },
+      "parameters": { "datastore": 139289 }
+    },
+    {
+      "id": 42,
+      "mapper": {
+        "entry": "{{41.task_id}}: {{41.title}} [asu {{ifempty(41.asu_number;\"none\")}}] — {{41.status}}, priority {{ifempty(41.priority;\"medium\")}}, assignee {{ifempty(41.assignee_username;\"unassigned\")}}, due {{ifempty(formatDate(41.due_date;\"YYYY-MM-DD\");\"no date\")}}"
+      },
+      "module": "builtin:BasicAggregator",
+      "version": 1,
+      "metadata": { "designer": { "x": 850, "y": 300 } },
+      "parameters": { "feeder": 41 }
+    },
+    {
+      "id": 43,
+      "mapper": { "filter": [[{ "a": "number", "o": "exist" }]] },
+      "module": "datastore:SearchRecord",
+      "version": 1,
+      "metadata": { "designer": { "x": 750, "y": 450 } },
+      "parameters": { "datastore": 139288 }
+    },
+    {
+      "id": 44,
+      "mapper": {
+        "entry": "ASU {{43.number}} ({{ifempty(43.topic;\"\")}}): {{43.title}} — effective {{formatDate(43.public_effective_date;\"YYYY-MM-DD\")}}"
+      },
+      "module": "builtin:BasicAggregator",
+      "version": 1,
+      "metadata": { "designer": { "x": 850, "y": 450 } },
+      "parameters": { "feeder": 43 }
+    },
+    {
+      "id": 4,
+      "mapper": {
+        "model": "claude-sonnet-5",
+        "system": "You're David's personal assistant, texting with him one-on-one on Telegram. Talk like an actual friend texting back, not like a bot: warm, casual, natural, a little playful when it fits. Keep replies short and conversational, the way people actually text.\n\nFormatting: never use asterisks, markdown bold or italics, or bullet symbols like - or • in your replies. Telegram shows these as literal characters, not formatting, so just write plain sentences.\n\nFor every message you either:\n1. Reply normally in plain conversational text. This is the default, use it almost all the time.\n2. Output exactly one line of raw JSON to save a new fact you learned about David, in this shape: {\"remember\": \"the fact, written plainly\"}\n3. Output exactly one line of raw JSON to set a reminder David asked for, in this shape: {\"remind\": \"what to remind him of\", \"at\": \"2026-08-20T15:00:00\"}. The at value must be an ISO datetime using 24-hour hours (00-23), no timezone offset, interpreted in Kuala Lumpur time (GMT+8, David's timezone).\n4. Output exactly one line of raw JSON to cancel or complete an existing reminder, in this shape: {\"cancel\": \"AB12CD\"}, where AB12CD is copied exactly from the id shown in David's open reminders list below. Use this whenever David says a reminder is done, wants it removed, cancelled, or says never mind about it. If it's not obvious which open reminder he means, don't guess, just ask him normally in plain text.\n\nTime conversion, this is where mistakes happen so be careful: 12am (midnight) = 00, 1am-11am = 01-11 (same as the clock number), 12pm (noon) = 12, 1pm-11pm = 13-23 (add 12 to the clock number). Examples: 3pm = 15, 6:30pm = 18:30, 9pm = 21, 11:45pm = 23:45, 8am = 08. Before finalizing the JSON, check your hour: if the requested time is anywhere from 1pm through 11:59pm, the hour must be 13 or higher, never 01-11.\n\nYou'll be given the current date and time before David's message each turn, both in 24-hour form and as a plain 12-hour readout with AM/PM, already in David's Kuala Lumpur (GMT+8) timezone. Use it to resolve relative phrases like in 20 minutes, tomorrow at 9am, or next Friday, and trust the AM/PM readout over your own guess about what time it is.\n\nThis rule is non-negotiable: if you decide to save a fact, set a reminder, or cancel a reminder, your entire reply must be nothing but that one line of JSON. No greeting, no explanation, no extra words before or after it. Mixing a sentence with the JSON breaks the automation reading your reply.\n\nRight:\n{\"remember\": \"David's dog is named Biscuit\"}\n{\"remind\": \"call the vet\", \"at\": \"2026-08-20T15:00:00\"}\n{\"cancel\": \"AB12CD\"}\n\nWrong, never do this:\nGot it, I'll remember that! {\"remember\": \"David's dog is named Biscuit\"}\n\nSave facts proactively. Any time David tells you something worth remembering, a preference, a person in his life, a plan, a date, anything a good friend would remember, save it right away with the JSON format above, even if he didn't explicitly ask you to remember it. Don't ask permission, don't narrate that you're saving it, just output the JSON. You'll get a chance to talk normally again on his next message.\n\nSet reminders when David asks to be reminded of something, or asks you to remind him at or in some amount of time. Always resolve the time to a specific ISO datetime using the current date and time you're given. Confirm naturally on your next message, don't narrate inside the JSON reply itself.\n\nBefore each message you'll be given a list of known facts about David and a list of his open reminders with their ids. Use the facts naturally when relevant, like a friend who just remembers things, don't recite them back like a report. Use the reminder ids only when calling the cancel action, don't read them out loud unless David explicitly asks what's still pending.\n\nYou also help manage a shared FASB (Financial Accounting Standards Board) task tracker that David's whole team uses through this same bot. Unlike David's personal facts and reminders above, which stay private to each person's own chat, the FASB tasks and ASUs below are shared: every person who messages this bot sees and can act on the same lists, not just David.\n\nYou'll be given the current shared list of FASB ASUs (accounting standards, with their effective dates) and the current shared list of FASB tasks before each message. Use them to answer questions like what tasks are open, what's due soon, who a task is assigned to, or when an ASU takes effect directly in plain conversational text — you already have everything you need, no JSON needed just to answer or list things.\n\nFor actions that change the shared tracker, output exactly one line of raw JSON, same rule as your other actions above — nothing else in the reply:\n\n5. Create a new task: {\"add_task\": \"task title\", \"asu\": \"2023-09\", \"due\": \"YYYY-MM-DD\", \"priority\": \"high\"}. Only add_task (the title) is required; leave out asu, due, or priority if not mentioned. New tasks start unassigned with status todo.\n6. Claim a task for yourself: {\"claim_task\": \"t4f2a\"}. Copy the task_id exactly from the shared tasks list below — never invent one.\n7. Assign a task to someone else: {\"assign_task\": \"t4f2a\", \"assignee\": \"username\"}. Write the username without the @ symbol even if they used one. If they haven't messaged this bot before, the system will tell whoever asked instead of assigning it — that's expected, just let them know if that happens.\n8. Update a task's status: {\"update_status\": \"t4f2a\", \"status\": \"todo\"}. status must be exactly one of todo, in-progress, blocked, or done.\n9. Add a new ASU to track: {\"add_asu\": \"2025-05\", \"title\": \"Standard title\", \"due\": \"YYYY-MM-DD\", \"topic\": \"Topic 123\", \"summary\": \"one line summary\"}. add_asu (the number), title, and due (the public entity effective date) are required; topic and summary are optional.\n\nResolve due dates the same way you resolve reminder times: using the current date you're given, so tomorrow, next Friday, Oct 1 all become a specific YYYY-MM-DD. If someone refers to a task by description instead of id (like \"the CECL task\"), find its task_id yourself in the shared tasks list and use that — never guess or invent an id.",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Current date and time: {{formatDate(now; \"YYYY-MM-DD HH:mm:ss\"; \"Asia/Kuala_Lumpur\")}} 24-hour ({{formatDate(now; \"h:mm A\"; \"Asia/Kuala_Lumpur\")}}) Kuala Lumpur / GMT+8\n\nKnown facts about David: {{ifempty(join(map(3.array; \"fact\"); \"; \"); \"nothing yet\")}}\n\nOpen reminders (id: message, due date): {{ifempty(join(map(16.array; \"entry\"); \"; \"); \"none\")}}\n\nShared FASB tasks (id: title, asu, status, priority, assignee, due): {{ifempty(join(map(42.array; \"entry\"); \"; \"); \"none yet\")}}\n\nShared FASB ASUs on file (number: title, effective date): {{ifempty(join(map(44.array; \"entry\"); \"; \"); \"none yet\")}}\n\nMessage from {{ifempty(1.message.from.username; 1.message.from.first_name)}}: {{1.message.text}}",
+            "inputType": "single"
+          }
+        ],
+        "max_tokens": 1024
+      },
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "metadata": { "designer": { "x": 900, "y": 0 } },
+      "parameters": { "__IMTCONN__": 10541342 }
+    },
+    {
+      "id": 5,
+      "mapper": {},
+      "module": "builtin:BasicRouter",
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 6,
+              "filter": {
+                "name": "Reply is a JSON action",
+                "conditions": [[{ "a": "{{last(map(4.content; \"text\"; \"type\"; \"text\"))}}", "b": "{", "o": "text:contain" }]]
+              },
+              "mapper": {
+                "json": "{{substring(last(map(4.content; \"text\"; \"type\"; \"text\")); indexOf(last(map(4.content; \"text\"; \"type\"; \"text\")); \"{\"))}}"
+              },
+              "module": "json:ParseJSON",
+              "version": 1,
+              "metadata": { "designer": { "x": 1500, "y": -100 } },
+              "parameters": { "type": 465888 }
+            },
+            {
+              "id": 10,
+              "mapper": {},
+              "module": "builtin:BasicRouter",
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 7,
+                      "filter": { "name": "Is a remember action", "conditions": [[{ "a": "{{6.remember}}", "o": "exist" }]] },
+                      "mapper": { "data": { "fact": "{{6.remember}}", "kind": "fact", "chat_id": "{{1.message.chat.id}}" }, "overwrite": false },
+                      "module": "datastore:AddRecord",
+                      "version": 1,
+                      "metadata": { "designer": { "x": 1800, "y": -200 } },
+                      "parameters": { "datastore": 134897 }
+                    },
+                    {
+                      "id": 8,
+                      "mapper": { "text": "Got it, I'll remember that.", "chatId": "{{1.message.chat.id}}" },
+                      "module": "telegram:SendReplyMessage",
+                      "version": 1,
+                      "metadata": { "designer": { "x": 2100, "y": -200 } },
+                      "parameters": { "__IMTCONN__": 10541339 }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 21,
+                      "filter": { "name": "Is a remind action", "conditions": [[{ "a": "{{6.remind}}", "o": "exist" }]] },
+                      "mapper": { "name": "task_id", "scope": "roundtrip", "value": "{{formatDate(now; \"HHmmss\")}}" },
+                      "module": "util:SetVariable2",
+                      "version": 1,
+                      "metadata": { "designer": { "x": 1800, "y": -100 } },
+                      "parameters": {}
+                    },
+                    {
+                      "id": 13,
+                      "mapper": {
+                        "data": {
+                          "kind": "reminder",
+                          "due_at": "{{parseDate(6.at; \"YYYY-MM-DDTHH:mm:ss\"; \"Asia/Kuala_Lumpur\")}}",
+                          "chat_id": "{{1.message.chat.id}}",
+                          "message": "{{6.remind}}",
+                          "task_id": "{{21.task_id}}"
+                        },
+                        "overwrite": false
+                      },
+                      "module": "datastore:AddRecord",
+                      "version": 1,
+                      "metadata": { "designer": { "x": 2100, "y": -100 } },
+                      "parameters": { "datastore": 134897 }
+                    },
+                    {
+                      "id": 14,
+                      "mapper": {
+                        "text": "Got it, I'll remind you at {{6.at}}. Reply \"cancel {{21.task_id}}\" anytime to cancel it.",
+                        "chatId": "{{1.message.chat.id}}"
+                      },
+                      "module": "telegram:SendReplyMessage",
+                      "version": 1,
+                      "metadata": { "designer": { "x": 2400, "y": -100 } },
+                      "parameters": { "__IMTCONN__": 10541339 }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 18,
+                      "filter": { "name": "Is a cancel action", "conditions": [[{ "a": "{{6.cancel}}", "o": "exist" }]] },
+                      "mapper": {
+                        "filter": [
+                          [
+                            { "a": "task_id", "b": "{{6.cancel}}", "o": "text:equal" },
+                            { "a": "chat_id", "b": "{{1.message.chat.id}}", "o": "number:equal" },
+                            { "a": "kind", "b": "reminder", "o": "text:equal" }
+                          ]
+                        ]
+                      },
+                      "module": "datastore:SearchRecord",
+                      "version": 1,
+                      "metadata": { "designer": { "x": 1800, "y": 0 } },
+                      "parameters": { "datastore": 134897 }
+                    },
+                    {
+                      "id": 19,
+                      "mapper": { "key": "{{18.key}}" },
+                      "module": "datastore:DeleteRecord",
+                      "version": 1,
+                      "metadata": { "designer": { "x": 2100, "y": 0 } },
+                      "parameters": { "datastore": 134897 }
+                    },
+                    {
+                      "id": 20,
+                      "mapper": { "text": "Got it, cancelled that reminder.", "chatId": "{{1.message.chat.id}}" },
+                      "module": "telegram:SendReplyMessage",
+                      "version": 1,
+                      "metadata": { "designer": { "x": 2400, "y": 0 } },
+                      "parameters": { "__IMTCONN__": 10541339 }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 50,
+                      "filter": { "name": "Is an add_task action", "conditions": [[{ "a": "{{6.add_task}}", "o": "exist" }]] },
+                      "mapper": { "name": "new_task_id", "scope": "roundtrip", "value": "t{{formatDate(now; \"HHmmss\")}}" },
+                      "module": "util:SetVariable2",
+                      "version": 1,
+                      "metadata": { "designer": { "x": 1800, "y": 100 } },
+                      "parameters": {}
+                    },
+                    {
+                      "id": 51,
+                      "mapper": {
+                        "key": "{{50.new_task_id}}",
+                        "data": {
+                          "title": "{{6.add_task}}",
+                          "status": "todo",
+                          "task_id": "{{50.new_task_id}}",
+                          "due_date": "{{6.due}}",
+                          "priority": "{{ifempty(6.priority; \"medium\")}}",
+                          "asu_number": "{{6.asu}}",
+                          "created_at": "{{now}}",
+                          "updated_at": "{{now}}",
+                          "description": "",
+                          "created_by_chat_id": "{{1.message.chat.id}}",
+                          "created_by_username": "{{1.message.from.username}}"
+                        },
+                        "overwrite": false
+                      },
+                      "module": "datastore:AddRecord",
+                      "version": 1,
+                      "metadata": { "designer": { "x": 2100, "y": 100 } },
+                      "parameters": { "datastore": 139289 }
+                    },
+                    {
+                      "id": 52,
+                      "mapper": { "text": "✅ Created task {{50.new_task_id}}: {{6.add_task}}", "chatId": "{{1.message.chat.id}}" },
+                      "module": "telegram:SendReplyMessage",
+                      "version": 1,
+                      "metadata": { "designer": { "x": 2400, "y": 100 } },
+                      "parameters": { "__IMTCONN__": 10541339 }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 53,
+                      "filter": { "name": "Is a claim_task action", "conditions": [[{ "a": "{{6.claim_task}}", "o": "exist" }]] },
+                      "mapper": {
+                        "key": "{{6.claim_task}}",
+                        "data": {
+                          "updated_at": "{{now}}",
+                          "assignee_chat_id": "{{1.message.chat.id}}",
+                          "assignee_username": "{{1.message.from.username}}"
+                        },
+                        "upsert": false
+                      },
+                      "module": "datastore:UpdateRecord",
+                      "version": 1,
+                      "metadata": { "designer": { "x": 1800, "y": 200 } },
+                      "parameters": { "datastore": 139289 }
+                    },
+                    {
+                      "id": 54,
+                      "mapper": { "text": "👍 You're now assigned to {{6.claim_task}}.", "chatId": "{{1.message.chat.id}}" },
+                      "module": "telegram:SendReplyMessage",
+                      "version": 1,
+                      "metadata": { "designer": { "x": 2100, "y": 200 } },
+                      "parameters": { "__IMTCONN__": 10541339 }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 55,
+                      "filter": { "name": "Is an update_status action", "conditions": [[{ "a": "{{6.update_status}}", "o": "exist" }]] },
+                      "mapper": { "key": "{{6.update_status}}", "data": { "status": "{{6.status}}", "updated_at": "{{now}}" }, "upsert": false },
+                      "module": "datastore:UpdateRecord",
+                      "version": 1,
+                      "metadata": { "designer": { "x": 1800, "y": 300 } },
+                      "parameters": { "datastore": 139289 }
+                    },
+                    {
+                      "id": 56,
+                      "mapper": { "text": "Updated {{6.update_status}} to {{6.status}}.", "chatId": "{{1.message.chat.id}}" },
+                      "module": "telegram:SendReplyMessage",
+                      "version": 1,
+                      "metadata": { "designer": { "x": 2100, "y": 300 } },
+                      "parameters": { "__IMTCONN__": 10541339 }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 57,
+                      "filter": { "name": "Is an add_asu action", "conditions": [[{ "a": "{{6.add_asu}}", "o": "exist" }]] },
+                      "mapper": {
+                        "key": "{{6.add_asu}}",
+                        "data": {
+                          "url": "",
+                          "tags": "",
+                          "title": "{{6.title}}",
+                          "topic": "{{6.topic}}",
+                          "number": "{{6.add_asu}}",
+                          "summary": "{{6.summary}}",
+                          "other_effective_date": "{{6.due}}",
+                          "public_effective_date": "{{6.due}}"
+                        },
+                        "overwrite": false
+                      },
+                      "module": "datastore:AddRecord",
+                      "version": 1,
+                      "metadata": { "designer": { "x": 1800, "y": 400 } },
+                      "parameters": { "datastore": 139288 }
+                    },
+                    {
+                      "id": 58,
+                      "mapper": { "text": "✅ Added ASU {{6.add_asu}}: {{6.title}}", "chatId": "{{1.message.chat.id}}" },
+                      "module": "telegram:SendReplyMessage",
+                      "version": 1,
+                      "metadata": { "designer": { "x": 2100, "y": 400 } },
+                      "parameters": { "__IMTCONN__": 10541339 }
+                    }
+                  ]
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 59,
+                      "filter": { "name": "Is an assign_task action", "conditions": [[{ "a": "{{6.assign_task}}", "o": "exist" }]] },
+                      "mapper": { "filter": [[{ "a": "username", "b": "{{6.assignee}}", "o": "text:equal:ci" }]] },
+                      "module": "datastore:SearchRecord",
+                      "version": 1,
+                      "metadata": { "designer": { "x": 1800, "y": 500 } },
+                      "parameters": { "datastore": 139287 }
+                    },
+                    {
+                      "id": 60,
+                      "mapper": { "chat_id": "{{59.chat_id}}", "username": "{{59.username}}" },
+                      "module": "builtin:BasicAggregator",
+                      "version": 1,
+                      "metadata": { "designer": { "x": 2000, "y": 500 } },
+                      "parameters": { "feeder": 59 }
+                    },
+                    {
+                      "id": 61,
+                      "mapper": {},
+                      "module": "builtin:BasicRouter",
+                      "routes": [
+                        {
+                          "flow": [
+                            {
+                              "id": 62,
+                              "filter": { "name": "Assignee found", "conditions": [[{ "a": "{{60.array[1].chat_id}}", "o": "exist" }]] },
+                              "mapper": {
+                                "key": "{{6.assign_task}}",
+                                "data": {
+                                  "updated_at": "{{now}}",
+                                  "assignee_chat_id": "{{60.array[1].chat_id}}",
+                                  "assignee_username": "{{60.array[1].username}}"
+                                },
+                                "upsert": false
+                              },
+                              "module": "datastore:UpdateRecord",
+                              "version": 1,
+                              "metadata": { "designer": { "x": 2400, "y": 450 } },
+                              "parameters": { "datastore": 139289 }
+                            },
+                            {
+                              "id": 63,
+                              "mapper": { "text": "👍 Assigned {{6.assign_task}} to @{{60.array[1].username}}.", "chatId": "{{1.message.chat.id}}" },
+                              "module": "telegram:SendReplyMessage",
+                              "version": 1,
+                              "metadata": { "designer": { "x": 2700, "y": 450 } },
+                              "parameters": { "__IMTCONN__": 10541339 }
+                            }
+                          ]
+                        },
+                        {
+                          "flow": [
+                            {
+                              "id": 64,
+                              "filter": { "name": "Assignee not found", "conditions": [[{ "a": "{{60.array[1].chat_id}}", "o": "notexist" }]] },
+                              "mapper": {
+                                "text": "{{6.assignee}} hasn't messaged this bot yet, so I can't assign {{6.assign_task}} to them. Ask them to send this bot a message first.",
+                                "chatId": "{{1.message.chat.id}}"
+                              },
+                              "module": "telegram:SendReplyMessage",
+                              "version": 1,
+                              "metadata": { "designer": { "x": 2400, "y": 550 } },
+                              "parameters": { "__IMTCONN__": 10541339 }
+                            }
+                          ]
+                        }
+                      ],
+                      "metadata": { "designer": { "x": 2200, "y": 500 } },
+                      "parameters": {}
+                    }
+                  ]
+                }
+              ],
+              "version": 1,
+              "metadata": { "designer": { "x": 1500, "y": -100 } },
+              "parameters": {}
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 9,
+              "filter": {
+                "name": "Reply is plain text",
+                "conditions": [[{ "a": "{{last(map(4.content; \"text\"; \"type\"; \"text\"))}}", "b": "{", "o": "text:notcontain" }]]
+              },
+              "mapper": { "text": "{{last(map(4.content; \"text\"; \"type\"; \"text\"))}}", "chatId": "{{1.message.chat.id}}" },
+              "module": "telegram:SendReplyMessage",
+              "version": 1,
+              "metadata": { "designer": { "x": 1500, "y": 100 } },
+              "parameters": { "__IMTCONN__": 10541339 }
+            }
+          ]
+        }
+      ],
+      "version": 1,
+      "metadata": { "designer": { "x": 1200, "y": 0 } },
+      "parameters": {}
+    }
+  ],
+  "name": "Personal Assistant - Chat",
+  "metadata": {
+    "zone": "us2.make.com",
+    "instant": true,
+    "version": 1,
+    "designer": { "orphans": [] },
+    "scenario": {
+      "dlq": false,
+      "dataloss": false,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "roundtrips": 1,
+      "sequential": true,
+      "confidential": false,
+      "freshVariables": false,
+      "autoCommitTriggerLast": true
+    }
+  },
+  "scheduling": { "type": "immediately" }
+}

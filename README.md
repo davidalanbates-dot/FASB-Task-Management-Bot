@@ -1,84 +1,124 @@
 # FASB Task Management Bot
 
-A multi-user Telegram bot for tracking FASB Accounting Standards Updates
-(ASUs) and the implementation tasks they require. It's a **shared
-workspace**: every registered user can see and act on everyone's tasks —
-claim them, reassign them, update status/due dates — there's no
-per-user privacy.
+A multi-user Telegram personal assistant that also manages a shared FASB
+(Financial Accounting Standards Board) task tracker for a team.
 
-## Setup
+**This is not a code deployment.** The bot runs live on
+[Make.com](https://make.com) as a set of scenarios (visual automations), not
+as a Node/Python/etc. process you start yourself. This repo exists as
+**documentation and version-controlled backups** of that Make.com system —
+see [Editing the live system](#editing-the-live-system) below for how
+changes actually get made.
 
-### 1. Create a bot with @BotFather
+## What it does
 
-1. Open Telegram and message [@BotFather](https://t.me/BotFather).
-2. Send `/newbot` and follow the prompts (choose a name and a username
-   ending in `bot`).
-3. BotFather replies with an **API token** — copy it.
+Message the bot on Telegram and it responds like a person, powered by
+Claude. Two things live behind that one chat interface:
 
-### 2. Configure and run
+- **Personal assistant** (private per person): remembers facts you tell it
+  and sets/cancels reminders, texting you back when they're due.
+- **Shared FASB tracker** (same list for everyone who's messaged the bot):
+  track FASB Accounting Standards Updates (ASUs) and implementation tasks
+  against them — create tasks, claim them, assign them to a teammate,
+  update status, and get a daily digest of what's due.
 
-```bash
-npm install
-cp .env.example .env
-# paste your token into .env: TELEGRAM_BOT_TOKEN=...
-npm start
+Facts and reminders stay private to each person's own Telegram chat. FASB
+tasks and ASUs are shared — everyone sees and can act on the same lists.
+
+## Talking to it
+
+No slash commands — just talk normally. Examples:
+
+- "add a task to review the CECL disclosures, due Oct 1, high priority"
+- "what tasks are open right now"
+- "assign t4f2a to bob"
+- "mark t4f2a as done"
+- "when does ASU 2023-09 take effect"
+- "add ASU 2025-05, Title Here, effective 2027-06-30"
+- "remind me to call the vet tomorrow at 3pm"
+
+Every registered user (anyone who has sent the bot a message) can see and
+act on the full shared task/ASU lists.
+
+## System architecture
+
+Three Make.com scenarios, one shared Telegram bot connection:
+
+| Scenario | Trigger | Purpose |
+|---|---|---|
+| **Personal Assistant - Chat** | Telegram message (instant) | Main conversation loop: calls Claude, executes whatever action it decides on (remember/remind/cancel/add_task/claim_task/assign_task/update_status/add_asu), replies |
+| **Personal Assistant - Reminder Dispatcher** | Scheduled, hourly | Sends any personal reminder whose due time has passed, then deletes it |
+| **Personal Assistant - FASB Digest** | Scheduled, daily at 08:00 (org timezone — see note below) | DMs each registered user their tasks due within 3 days (or overdue) plus any ASUs becoming effective within 30 days |
+
+Blueprint exports of all three live in [`make/`](./make) for reference and
+diffing — see [Editing the live system](#editing-the-live-system) for how
+to keep them in sync with what's actually deployed.
+
+> **Timezone note:** the digest is scheduled in the Make organization's
+> account timezone (America/New_York), while the assistant's own persona
+> and reminder-time parsing are written for Kuala Lumpur (GMT+8). If 08:00
+> local isn't landing at the right time for you, adjust the schedule in
+> Make's scenario editor (or ask to have it changed).
+
+## Data model
+
+Four Make Data Stores, all on team "My Team":
+
+- **Memory** *(pre-existing)* — personal facts and reminders, one record
+  kind per row (`kind: "fact"` or `kind: "reminder"`), scoped by `chat_id`.
+- **FASB Bot Users** — every person who has messaged the bot: `chat_id`
+  (record key), `username`, `first_name`, `last_seen`. Refreshed on every
+  message so `/assign`-by-username always resolves to a current chat id.
+- **FASB ASUs** — accounting standards being tracked: `number` (record
+  key, e.g. `2023-09`), `title`, `topic`, `summary`,
+  `public_effective_date`, `other_effective_date`, `url`, `tags`. Seeded
+  with 8 well-known ASUs (revenue recognition, leases, CECL, segment
+  reporting, income tax disclosures, etc.) — effective dates are starting
+  points, verify against [fasb.org](https://fasb.org) and add more via
+  chat ("add ASU ...") as needed.
+- **FASB Tasks** — implementation tasks: `task_id` (record key, short
+  id), `asu_number`, `title`, `description`, `status`
+  (todo/in-progress/blocked/done), `priority` (low/medium/high),
+  `assignee_chat_id`, `assignee_username`, `created_by_chat_id`,
+  `created_by_username`, `due_date`, `created_at`, `updated_at`.
+
+## How the chat scenario decides what to do
+
+Claude gets, on every message: the current date/time, the sender's known
+facts, their open reminders, the full shared FASB task list, and the full
+shared ASU list. It either replies in plain text (used for anything
+read-only — answering questions, listing tasks) or outputs exactly one
+line of raw JSON naming an action, which Make parses and executes:
+
+```
+{"remember": "..."}
+{"remind": "...", "at": "YYYY-MM-DDTHH:mm:ss"}
+{"cancel": "<reminder_id>"}
+{"add_task": "title", "asu": "2023-09", "due": "YYYY-MM-DD", "priority": "high"}
+{"claim_task": "<task_id>"}
+{"assign_task": "<task_id>", "assignee": "username"}
+{"update_status": "<task_id>", "status": "todo|in-progress|blocked|done"}
+{"add_asu": "2025-05", "title": "...", "due": "YYYY-MM-DD", "topic": "...", "summary": "..."}
 ```
 
-The bot runs via long polling — no public URL or webhook needed. Every
-user who wants to use it sends `/start` to the bot in Telegram first;
-that registers them so others can `/assign` tasks to them and so they
-receive the daily digest.
+All fields except the named required ones are optional. Claude is
+instructed to always copy `task_id`/reminder ids from the lists it's
+given rather than invent them.
 
-Run `npm run dev` instead of `npm start` during development to
-auto-restart on file changes.
+## Editing the live system
 
-## Commands
+The Make scenarios are the source of truth — this repo is a mirror, not a
+build artifact:
 
-**Standards**
-- `/timeline` — all FASB ASUs by effective date
-- `/asu 2023-09` — details for one ASU, plus its linked tasks
-- `/addasu 2025-05 | Title | due:2027-06-30 | topic:Topic 123 | summary:...` — add a new ASU
+1. Make changes in the [Make.com scenario editor](https://www.make.com/en/login)
+   (or via the Make API/MCP tools) directly against team **My Team**
+   (org "My Organization").
+2. Re-export the updated blueprint (Scenario → ⋮ → Export blueprint, or
+   fetch it via the API) and commit the refreshed JSON under `make/` so
+   this repo stays a faithful mirror.
+3. Data store schema changes (adding a field, etc.) aren't captured in
+   scenario blueprints — note them here in the README if they happen.
 
-**Tasks** (shared — everyone sees everyone's)
-- `/tasks [status]` — list tasks, optionally filtered by `todo` / `in-progress` / `blocked` / `done`
-- `/mytasks` — tasks assigned to you
-- `/newtask Title | asu:2023-09 | due:2026-10-01 | priority:high | assignee:@bob` — create a task (only the title is required)
-- `/claim t0001` — assign a task to yourself
-- `/assign t0001 @bob` — assign a task to a registered user
-- `/status t0001 in-progress` — update status
-- `/due t0001 2026-12-01` — update a task's due date
-
-**Other**
-- `/users` — everyone registered in this workspace
-- `/digest` — your personal due/overdue tasks + upcoming ASUs, on demand
-- `/help` — list of all commands
-
-## Reminders
-
-A daily digest runs on a cron schedule (default 13:00 UTC) and DMs each
-registered user their overdue/due-soon tasks plus any ASUs becoming
-effective soon. Configure the schedule via `REMINDER_CRON` /
-`REMINDER_TZ` in `.env` — see `.env.example` for all options. Use
-`/digest` any time to preview it without waiting for the schedule.
-
-## Data
-
-Everything (`users`, `asus`, `tasks`) is persisted to a single JSON file
-at `src/data/db.json` — no external database required. It ships seeded
-with a starter set of well-known FASB ASUs (revenue recognition, leases,
-CECL, segment reporting, income tax disclosures, etc.). Effective dates
-are illustrative starting points — verify current effective dates
-against [fasb.org](https://fasb.org) and add/edit ASUs with `/addasu`
-as needed.
-
-## Project layout
-
-```
-src/
-  index.js      entrypoint: loads env, launches the bot, schedules reminders
-  bot.js        Telegraf command handlers
-  reminders.js  daily digest logic (cron + on-demand /digest)
-  store.js      data access layer over src/data/db.json
-  format.js     date/HTML/emoji formatting helpers
-  data/db.json  persisted data (users, asus, tasks)
-```
+Do not treat the JSON files under `make/` as something you `npm install`
+and run; they're Make.com scenario blueprints, importable back into Make
+if you ever need to restore or clone the setup.

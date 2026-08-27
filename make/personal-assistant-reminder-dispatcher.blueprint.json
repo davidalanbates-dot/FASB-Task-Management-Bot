@@ -1,0 +1,38 @@
+{
+  "flow": [
+    {
+      "id": 1,
+      "mapper": {
+        "filter": [
+          [
+            { "a": "kind", "b": "reminder", "o": "text:equal" },
+            { "a": "due_at", "b": "{{now}}", "o": "date:lessorequal" }
+          ]
+        ]
+      },
+      "module": "datastore:SearchRecord",
+      "version": 1,
+      "metadata": { "designer": { "x": 0, "y": 0 } },
+      "parameters": { "datastore": 134897 }
+    },
+    {
+      "id": 2,
+      "mapper": { "text": "{{1.data.message}}", "chatId": "{{1.data.chat_id}}" },
+      "module": "telegram:SendReplyMessage",
+      "version": 1,
+      "metadata": { "designer": { "x": 300, "y": 0 } },
+      "parameters": { "__IMTCONN__": 10541339 }
+    },
+    {
+      "id": 3,
+      "mapper": { "key": "{{1.key}}" },
+      "module": "datastore:DeleteRecord",
+      "version": 1,
+      "metadata": { "designer": { "x": 600, "y": 0 } },
+      "parameters": { "datastore": 134897 }
+    }
+  ],
+  "name": "Personal Assistant - Reminder Dispatcher",
+  "metadata": { "instant": false, "version": 1 },
+  "scheduling": { "type": "indefinitely", "interval": 3600 }
+}
