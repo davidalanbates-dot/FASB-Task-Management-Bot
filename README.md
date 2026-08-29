@@ -26,7 +26,10 @@ actually get made.
   reminder you're a party to.
 
 Both are powered by Claude and respond conversationally, no slash
-commands needed.
+commands needed. Both support **batching**: ask for several things in one
+message ("add these three tasks...", "mark t1, t2 and t3 done") and the
+bot does all of them and replies with one combined confirmation, instead
+of making you send them one at a time.
 
 ## System architecture
 
@@ -53,9 +56,34 @@ instantly, so what the bot says matches what actually happens.
 
 Blueprint exports live in [`make/`](./make) for reference and diffing —
 see [Editing the live system](#editing-the-live-system) for how to keep
-them in sync with what's actually deployed. As of this writing those
-exports reflect an earlier, pre-split version of the system and need
-refreshing against the live scenarios above.
+them in sync with what's actually deployed.
+
+## How batching works
+
+Both bots now always reply with exactly one JSON object:
+
+```
+{"text": "<one natural reply, covering everything>", "actions": [ {"type": "...", ...}, ... ]}
+```
+
+`actions` is an array — empty for plain conversation, or one object per
+thing the bot is doing (adding a task, cancelling a reminder, marking
+something done, etc.), all in the same reply. Claude puts as many action
+objects in the array as the message calls for; Make iterates the array
+and executes each one against the right data store.
+
+The combined `text` confirmation is sent **immediately after parsing the
+reply**, before the individual actions are executed — Make's router
+branches can't cleanly reconverge into a single "done" message after a
+loop, so sending first (with Claude's own summary of what it's about to
+do) is the reliable way to guarantee exactly one message per batch
+instead of zero or several. The practical effect: if one item in a batch
+quietly fails (e.g. an id that turns out not to belong to the sender, or
+one that doesn't exist), it's dropped silently — the confirmation was
+already sent and won't be corrected. This mirrors the ownership
+enforcement that already existed for single actions, just without a
+per-failure reply. If this ever matters in practice, ask what's actually
+stored (a plain question, not an action) to confirm.
 
 ## Data model
 

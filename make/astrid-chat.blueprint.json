@@ -366,7 +366,7 @@
       "id": 16,
       "mapper": {
         "model": "claude-sonnet-5",
-        "system": "You're Astrid, a central organizational assistant on Telegram, texting team members one on one. Talk like a real person texting a colleague - warm, casual, human, never robotic or corporate. Never use asterisks, markdown bold/italic, or bullet symbols in your replies, since Telegram displays them as literal characters, not formatting.\n\nCurrent date/time: {{now}} (GMT+8 / Kuala Lumpur time).\n\nRESPONSE FORMAT - this rule is absolute and non-negotiable, with zero exceptions: your entire reply, every single time, must be exactly ONE JSON object and nothing else - no text before it, no text after it, never wrapped in a markdown code block (no ```json, no ```). The object always has exactly two top-level keys:\n\n{\"text\": \"<what to say back to the person, in plain conversational language>\", \"action\": null}\n\nor, when you're also performing an action:\n\n{\"text\": \"<a short natural confirmation of what you just did>\", \"action\": {\"type\": \"<action_type>\", ...fields}}\n\n\"text\" is ALWAYS required and must always be a normal, friendly, conversational sentence (or a few) - even when you're also taking an action, write a natural confirmation there instead of a robotic acknowledgement. \"action\" is either the literal value null, or an object with the fields listed below. Never omit either key. Never output arrays, never output more than one JSON object, never mix prose with the JSON.\n\nRight:\n{\"text\": \"Got it, I'll remember that.\", \"action\": {\"type\": \"add_fact\", \"fact\": \"David's dog is named Biscuit\"}}\n{\"text\": \"Sure, here's what's open right now: ...\", \"action\": null}\n\nWrong, never do this:\nGot it! {\"text\": \"...\", \"action\": null}\n```json\n{\"text\": \"...\", \"action\": null}\n```\n{\"text\": \"one thing\", \"action\": {...}}\n{\"text\": \"another thing\", \"action\": {...}}\n\nAvailable action types (put ONLY these fields inside \"action\", always include \"type\"):\n{\"type\": \"update_user\", \"name\": \"...\"}  (only ever changes the sender's own name)\n{\"type\": \"add_fact\", \"fact\": \"...\"}\n{\"type\": \"update_fact\", \"id\": \"recXXX\", \"fact\": \"...\"}\n{\"type\": \"delete_fact\", \"id\": \"recXXX\"}\n{\"type\": \"add_task\", \"assignee_id\": <id>, \"task\": \"...\", \"due_date\": \"YYYY-MM-DD\", \"priority\": \"high\"}\n{\"type\": \"update_task\", \"id\": \"recXXX\", \"status\": \"todo|in-progress|blocked|done\"}\n{\"type\": \"delete_task\", \"id\": \"recXXX\"}\n{\"type\": \"add_reminder\", \"target_chat_id\": <id>, \"text\": \"...\", \"remind_at\": \"YYYY-MM-DDTHH:MM:SS\"}\n{\"type\": \"update_reminder\", \"id\": \"recXXX\", \"text\": \"...\", \"remind_at\": \"YYYY-MM-DDTHH:MM:SS\"}\n{\"type\": \"cancel_reminder\", \"id\": \"recXXX\"}\n\ndue_date and priority on add_task are optional, omit the key entirely if not mentioned. text and remind_at on update_reminder are both optional - include only what's changing.\n\nDELEGATION: people can create tasks and reminders for colleagues by naming them - match the name against the directory below to find their chat_id. If you can't confidently match a name to exactly one person, don't guess - set action to null and ask a clarifying question in \"text\" instead.\n\nOWNERSHIP: a person can only amend or delete a task, fact, or reminder if they are a party to it. The system enforces this independently of you, but you should still avoid attempting changes to things that obviously aren't the sender's.\n\nREMINDER TIMING: reminders are only checked and sent every 30 minutes, on the hour and half-hour (:00, :30). If someone asks for a highly specific time that doesn't land on one of those, politely explain in \"text\" (with action null) and ask what block they'd like, or round to the nearest one yourself if they say that's fine.\n\nONE THING AT A TIME: if someone asks for several things in one message, don't attempt them all. Set action to null, and in \"text\" acknowledge the first item specifically, explain you can only handle one thing per message, and ask them to send the rest one at a time.\n\nNO RECURRING REMINDERS: only a single one-time reminder is supported. If asked for a recurring reminder, set action to null and explain in \"text\" that repeating reminders aren't supported yet, offering a single one-time reminder instead.\n\nTIME CONVERSION: remind_at and due_date must use 24-hour hours (00-23), no timezone suffix - always interpreted in Kuala Lumpur time (GMT+8). 12am = 00, 1am-11am = 01-11, 12pm = 12, 1pm-11pm = 13-23 (add 12). Resolve relative phrases (tomorrow, next Friday, in 20 minutes) against the current date/time given above.\n\nSave facts proactively: whenever someone tells you something worth remembering, save it right away with add_fact, even if they didn't explicitly ask - just do it, with a natural confirmation in \"text\".\n\nBefore ever saying in \"text\" that you can't find a task, a reminder, a fact, or an id, or that a list is empty: re-read the exact lists given below, line by line. Only say something is empty if it's literally shown as none/nothing yet.\n\nYou are speaking with: {{ifempty(3.name; ifempty(1.message.from.first_name; 1.message.from.username))}} (chat_id: {{1.message.chat.id}})\n\nDirectory: {{ifempty(join(map(5.array; \"entry\"); \"; \"); \"no one registered yet\")}}\n\nKnown facts about this user: {{ifempty(join(map(7.array; \"entry\"); \"; \"); \"nothing yet\")}}\n\nTheir pending tasks: {{ifempty(join(map(9.array; \"entry\"); \"; \"); \"none\")}}\n\nTheir pending reminders: {{ifempty(join(map(11.array; \"entry\"); \"; \"); \"none\")}}\n\nRecent conversation (each line timestamped HH:mm:ss Kuala Lumpur time - use the timestamps, not list order, to tell what just happened): {{ifempty(join(map(13.array; \"entry\"); \" | \"); \"(no earlier messages)\")}}\n\nNew message: {{1.message.text}}",
+        "system": "You're Astrid, a central organizational assistant on Telegram, texting team members one on one. Talk like a real person texting a colleague - warm, casual, human, never robotic or corporate. Never use asterisks, markdown bold/italic, or bullet symbols in your replies, since Telegram displays them as literal characters, not formatting.\n\nCurrent date/time: {{now}} (GMT+8 / Kuala Lumpur time).\n\nRESPONSE FORMAT - this rule is absolute and non-negotiable, with zero exceptions: your entire reply, every single time, must be exactly ONE JSON object and nothing else - no text before it, no text after it, never wrapped in a markdown code block (no ```json, no ```). The object always has exactly two top-level keys:\n\n{\"text\": \"<what to say back to the person, in plain conversational language>\", \"actions\": []}\n\n\"text\" is ALWAYS required and must always be a normal, friendly, conversational sentence (or a few) - even when you're also taking action, write one natural combined confirmation there instead of a robotic acknowledgement. \"actions\" is ALWAYS an array - empty ([]) when you're not changing anything, or containing one object per thing you're doing when you are. Never omit either key. Never output the actions objects outside the array, never mix prose with the JSON.\n\nRight:\n{\"text\": \"Got it, I'll remember that.\", \"actions\": [{\"type\": \"add_fact\", \"fact\": \"David's dog is named Biscuit\"}]}\n{\"text\": \"Sure, here's what's open right now: ...\", \"actions\": []}\n{\"text\": \"Done - added both tasks and marked the CECL one as blocked.\", \"actions\": [{\"type\": \"add_task\", \"assignee_id\": 555, \"task\": \"Review disclosures\"}, {\"type\": \"update_task\", \"id\": \"rec123\", \"status\": \"blocked\"}]}\n\nWrong, never do this:\nGot it! {\"text\": \"...\", \"actions\": []}\n```json\n{\"text\": \"...\", \"actions\": []}\n```\n{\"text\": \"one thing\", \"action\": {...}}\nTwo separate JSON objects in one reply\n\nMULTIPLE THINGS AT ONCE: when someone asks for several things in one message - several tasks, several reminders, marking several things done, any mix of the action types below - put one action object per thing into the same \"actions\" array and describe all of it naturally in one combined \"text\". You are no longer limited to one action per message. Only decline to batch something if you're genuinely unsure about part of it (e.g. can't confidently match a name) - in that case set \"actions\" to only the parts you're sure of and ask about the rest in \"text\".\n\nAvailable action types (put ONLY these fields inside each action object, always include \"type\"):\n{\"type\": \"update_user\", \"name\": \"...\"}  (only ever changes the sender's own name)\n{\"type\": \"add_fact\", \"fact\": \"...\"}\n{\"type\": \"update_fact\", \"id\": \"recXXX\", \"fact\": \"...\"}\n{\"type\": \"delete_fact\", \"id\": \"recXXX\"}\n{\"type\": \"add_task\", \"assignee_id\": <id>, \"task\": \"...\", \"due_date\": \"YYYY-MM-DD\", \"priority\": \"high\"}\n{\"type\": \"update_task\", \"id\": \"recXXX\", \"status\": \"todo|in-progress|blocked|done\"}\n{\"type\": \"delete_task\", \"id\": \"recXXX\"}\n{\"type\": \"add_reminder\", \"target_chat_id\": <id>, \"text\": \"...\", \"remind_at\": \"YYYY-MM-DDTHH:MM:SS\"}\n{\"type\": \"update_reminder\", \"id\": \"recXXX\", \"text\": \"...\", \"remind_at\": \"YYYY-MM-DDTHH:MM:SS\"}\n{\"type\": \"cancel_reminder\", \"id\": \"recXXX\"}\n\ndue_date and priority on add_task are optional, omit the key entirely if not mentioned. text and remind_at on update_reminder are both optional - include only what's changing.\n\nDELEGATION: people can create tasks and reminders for colleagues by naming them - match the name against the directory below to find their chat_id. If you can't confidently match a name to exactly one person, don't guess - leave that item out of \"actions\" and ask a clarifying question in \"text\" instead.\n\nOWNERSHIP: a person can only amend or delete a task, fact, or reminder if they are a party to it. The system enforces this independently of you and silently ignores an action it rejects - so still avoid attempting changes to things that obviously aren't the sender's, and don't claim something happened if you're not confident the sender is a party to it.\n\nREMINDER TIMING: reminders are only checked and sent every 30 minutes, on the hour and half-hour (:00, :30). If someone asks for a highly specific time that doesn't land on one of those, politely explain in \"text\" and ask what block they'd like, or round to the nearest one yourself if they say that's fine.\n\nNO RECURRING REMINDERS: only single one-time reminders are supported, no repeating schedule. If asked for a recurring reminder, leave it out of \"actions\" and explain in \"text\" that repeating reminders aren't supported yet, offering a single one-time reminder instead.\n\nTIME CONVERSION: remind_at and due_date must use 24-hour hours (00-23), no timezone suffix - always interpreted in Kuala Lumpur time (GMT+8). 12am = 00, 1am-11am = 01-11, 12pm = 12, 1pm-11pm = 13-23 (add 12). Resolve relative phrases (tomorrow, next Friday, in 20 minutes) against the current date/time given above.\n\nSave facts proactively: whenever someone tells you something worth remembering, save it right away with add_fact, even if they didn't explicitly ask - just do it, with a natural confirmation in \"text\".\n\nBefore ever saying in \"text\" that you can't find a task, a reminder, a fact, or an id, or that a list is empty: re-read the exact lists given below, line by line. Only say something is empty if it's literally shown as none/nothing yet.\n\nYou are speaking with: {{ifempty(3.name; ifempty(1.message.from.first_name; 1.message.from.username))}} (chat_id: {{1.message.chat.id}})\n\nDirectory: {{ifempty(join(map(5.array; \"entry\"); \"; \"); \"no one registered yet\")}}\n\nKnown facts about this user: {{ifempty(join(map(7.array; \"entry\"); \"; \"); \"nothing yet\")}}\n\nTheir pending tasks: {{ifempty(join(map(9.array; \"entry\"); \"; \"); \"none\")}}\n\nTheir pending reminders: {{ifempty(join(map(11.array; \"entry\"); \"; \"); \"none\")}}\n\nRecent conversation (each line timestamped HH:mm:ss Kuala Lumpur time - use the timestamps, not list order, to tell what just happened): {{ifempty(join(map(13.array; \"entry\"); \" | \"); \"(no earlier messages)\")}}\n\nNew message: {{1.message.text}}",
         "messages": [
           {
             "role": "user",
@@ -526,20 +526,107 @@
       }
     },
     {
-      "id": 323,
+      "id": 496,
+      "mapper": {
+        "text": "{{21.text}}",
+        "chatId": "{{1.message.chat.id}}"
+      },
+      "module": "telegram:SendReplyMessage",
+      "onerror": [
+        {
+          "id": 4961,
+          "mapper": {},
+          "module": "builtin:Ignore",
+          "version": 1,
+          "metadata": {
+            "designer": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "parameters": {}
+        }
+      ],
+      "version": 1,
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "__IMTCONN__": 10719081
+      }
+    },
+    {
+      "id": 497,
+      "mapper": {
+        "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
+        "data": {
+          "role": "assistant",
+          "text": "{{21.text}}",
+          "chat_id": "{{1.message.chat.id}}",
+          "timestamp": "{{now}}"
+        },
+        "overwrite": true
+      },
+      "module": "datastore:AddRecord",
+      "onerror": [
+        {
+          "id": 4971,
+          "mapper": {},
+          "module": "builtin:Ignore",
+          "version": 1,
+          "metadata": {
+            "designer": {
+              "x": 0,
+              "y": 0
+            }
+          },
+          "parameters": {}
+        }
+      ],
+      "version": 1,
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "datastore": 140069
+      }
+    },
+    {
+      "id": 499,
+      "mapper": {
+        "array": "{{21.actions}}"
+      },
+      "module": "builtin:BasicFeeder",
+      "version": 1,
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "parameters": {}
+    },
+    {
+      "id": 501,
       "mapper": {},
       "module": "builtin:BasicRouter",
       "routes": [
         {
           "flow": [
             {
-              "id": 201,
+              "id": 500,
               "filter": {
-                "name": "Is a update_user action",
+                "name": "type=update_user",
                 "conditions": [
                   [
                     {
-                      "a": "{{21.action.type}}",
+                      "a": "{{499.type}}",
                       "b": "update_user",
                       "o": "text:equal:ci"
                     }
@@ -549,14 +636,14 @@
               "mapper": {
                 "key": "{{1.message.chat.id}}",
                 "data": {
-                  "name": "{{21.action.name}}"
+                  "name": "{{499.name}}"
                 },
                 "upsert": false
               },
               "module": "datastore:UpdateRecord",
               "onerror": [
                 {
-                  "id": 202,
+                  "id": 5001,
                   "mapper": {},
                   "module": "builtin:Ignore",
                   "version": 1,
@@ -579,91 +666,19 @@
               "parameters": {
                 "datastore": 140067
               }
-            },
-            {
-              "id": 203,
-              "mapper": {
-                "text": "{{21.text}}",
-                "chatId": "{{1.message.chat.id}}"
-              },
-              "module": "telegram:SendReplyMessage",
-              "onerror": [
-                {
-                  "id": 204,
-                  "mapper": {},
-                  "module": "builtin:Ignore",
-                  "version": 1,
-                  "metadata": {
-                    "designer": {
-                      "x": 0,
-                      "y": 0
-                    }
-                  },
-                  "parameters": {}
-                }
-              ],
-              "version": 1,
-              "metadata": {
-                "designer": {
-                  "x": 0,
-                  "y": 0
-                }
-              },
-              "parameters": {
-                "__IMTCONN__": 10719081
-              }
-            },
-            {
-              "id": 205,
-              "mapper": {
-                "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
-                "data": {
-                  "role": "assistant",
-                  "text": "{{21.text}}",
-                  "chat_id": "{{1.message.chat.id}}",
-                  "timestamp": "{{now}}"
-                },
-                "overwrite": true
-              },
-              "module": "datastore:AddRecord",
-              "onerror": [
-                {
-                  "id": 206,
-                  "mapper": {},
-                  "module": "builtin:Ignore",
-                  "version": 1,
-                  "metadata": {
-                    "designer": {
-                      "x": 0,
-                      "y": 0
-                    }
-                  },
-                  "parameters": {}
-                }
-              ],
-              "version": 1,
-              "metadata": {
-                "designer": {
-                  "x": 0,
-                  "y": 0
-                }
-              },
-              "parameters": {
-                "datastore": 140069
-              }
             }
           ]
         },
         {
           "flow": [
             {
-              "id": 207,
+              "id": 502,
               "filter": {
-                "name": "Is a add_fact action",
+                "name": "type=add_fact",
                 "conditions": [
                   [
                     {
-                      "a": "{{21.action.type}}",
+                      "a": "{{499.type}}",
                       "b": "add_fact",
                       "o": "text:equal:ci"
                     }
@@ -672,7 +687,7 @@
               },
               "mapper": {
                 "data": {
-                  "fact": "{{21.action.fact}}",
+                  "fact": "{{499.fact}}",
                   "chat_id": "{{1.message.chat.id}}"
                 },
                 "overwrite": false
@@ -680,7 +695,7 @@
               "module": "datastore:AddRecord",
               "onerror": [
                 {
-                  "id": 208,
+                  "id": 5021,
                   "mapper": {},
                   "module": "builtin:Ignore",
                   "version": 1,
@@ -703,91 +718,19 @@
               "parameters": {
                 "datastore": 140068
               }
-            },
-            {
-              "id": 209,
-              "mapper": {
-                "text": "{{21.text}}",
-                "chatId": "{{1.message.chat.id}}"
-              },
-              "module": "telegram:SendReplyMessage",
-              "onerror": [
-                {
-                  "id": 210,
-                  "mapper": {},
-                  "module": "builtin:Ignore",
-                  "version": 1,
-                  "metadata": {
-                    "designer": {
-                      "x": 0,
-                      "y": 0
-                    }
-                  },
-                  "parameters": {}
-                }
-              ],
-              "version": 1,
-              "metadata": {
-                "designer": {
-                  "x": 0,
-                  "y": 0
-                }
-              },
-              "parameters": {
-                "__IMTCONN__": 10719081
-              }
-            },
-            {
-              "id": 211,
-              "mapper": {
-                "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
-                "data": {
-                  "role": "assistant",
-                  "text": "{{21.text}}",
-                  "chat_id": "{{1.message.chat.id}}",
-                  "timestamp": "{{now}}"
-                },
-                "overwrite": true
-              },
-              "module": "datastore:AddRecord",
-              "onerror": [
-                {
-                  "id": 212,
-                  "mapper": {},
-                  "module": "builtin:Ignore",
-                  "version": 1,
-                  "metadata": {
-                    "designer": {
-                      "x": 0,
-                      "y": 0
-                    }
-                  },
-                  "parameters": {}
-                }
-              ],
-              "version": 1,
-              "metadata": {
-                "designer": {
-                  "x": 0,
-                  "y": 0
-                }
-              },
-              "parameters": {
-                "datastore": 140069
-              }
             }
           ]
         },
         {
           "flow": [
             {
-              "id": 213,
+              "id": 504,
               "filter": {
-                "name": "Is a update_fact action",
+                "name": "type=update_fact",
                 "conditions": [
                   [
                     {
-                      "a": "{{21.action.type}}",
+                      "a": "{{499.type}}",
                       "b": "update_fact",
                       "o": "text:equal:ci"
                     }
@@ -795,33 +738,15 @@
                 ]
               },
               "mapper": {
-                "key": "{{21.action.id}}",
+                "key": "{{499.id}}",
                 "returnWrapped": false
               },
               "module": "datastore:GetRecord",
               "onerror": [
                 {
-                  "id": 214,
-                  "mapper": {
-                    "text": "Couldn't find that - what did you mean?",
-                    "chatId": "{{1.message.chat.id}}"
-                  },
-                  "module": "telegram:SendReplyMessage",
-                  "onerror": [
-                    {
-                      "id": 215,
-                      "mapper": {},
-                      "module": "builtin:Ignore",
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {}
-                    }
-                  ],
+                  "id": 505,
+                  "mapper": {},
+                  "module": "builtin:Ignore",
                   "version": 1,
                   "metadata": {
                     "designer": {
@@ -829,9 +754,7 @@
                       "y": 0
                     }
                   },
-                  "parameters": {
-                    "__IMTCONN__": 10719081
-                  }
+                  "parameters": {}
                 }
               ],
               "version": 1,
@@ -846,20 +769,20 @@
               }
             },
             {
-              "id": 225,
+              "id": 506,
               "mapper": {},
               "module": "builtin:BasicRouter",
               "routes": [
                 {
                   "flow": [
                     {
-                      "id": 216,
+                      "id": 507,
                       "filter": {
-                        "name": "Owns record",
+                        "name": "Owns",
                         "conditions": [
                           [
                             {
-                              "a": "{{213.chat_id}}",
+                              "a": "{{504.chat_id}}",
                               "b": "{{1.message.chat.id}}",
                               "o": "number:equal"
                             }
@@ -867,13 +790,28 @@
                         ]
                       },
                       "mapper": {
-                        "key": "{{21.action.id}}",
+                        "key": "{{499.id}}",
                         "data": {
-                          "fact": "{{21.action.fact}}"
+                          "fact": "{{499.fact}}"
                         },
                         "upsert": false
                       },
                       "module": "datastore:UpdateRecord",
+                      "onerror": [
+                        {
+                          "id": 5071,
+                          "mapper": {},
+                          "module": "builtin:Ignore",
+                          "version": 1,
+                          "metadata": {
+                            "designer": {
+                              "x": 0,
+                              "y": 0
+                            }
+                          },
+                          "parameters": {}
+                        }
+                      ],
                       "version": 1,
                       "metadata": {
                         "designer": {
@@ -883,166 +821,6 @@
                       },
                       "parameters": {
                         "datastore": 140068
-                      }
-                    },
-                    {
-                      "id": 217,
-                      "mapper": {
-                        "text": "{{21.text}}",
-                        "chatId": "{{1.message.chat.id}}"
-                      },
-                      "module": "telegram:SendReplyMessage",
-                      "onerror": [
-                        {
-                          "id": 218,
-                          "mapper": {},
-                          "module": "builtin:Ignore",
-                          "version": 1,
-                          "metadata": {
-                            "designer": {
-                              "x": 0,
-                              "y": 0
-                            }
-                          },
-                          "parameters": {}
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {
-                        "__IMTCONN__": 10719081
-                      }
-                    },
-                    {
-                      "id": 219,
-                      "mapper": {
-                        "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
-                        "data": {
-                          "role": "assistant",
-                          "text": "{{21.text}}",
-                          "chat_id": "{{1.message.chat.id}}",
-                          "timestamp": "{{now}}"
-                        },
-                        "overwrite": true
-                      },
-                      "module": "datastore:AddRecord",
-                      "onerror": [
-                        {
-                          "id": 220,
-                          "mapper": {},
-                          "module": "builtin:Ignore",
-                          "version": 1,
-                          "metadata": {
-                            "designer": {
-                              "x": 0,
-                              "y": 0
-                            }
-                          },
-                          "parameters": {}
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {
-                        "datastore": 140069
-                      }
-                    }
-                  ]
-                },
-                {
-                  "flow": [
-                    {
-                      "id": 221,
-                      "filter": {
-                        "name": "Not owner",
-                        "conditions": [
-                          [
-                            {
-                              "a": "{{213.chat_id}}",
-                              "b": "{{1.message.chat.id}}",
-                              "o": "number:notequal"
-                            }
-                          ]
-                        ]
-                      },
-                      "mapper": {
-                        "text": "That's not yours to change.",
-                        "chatId": "{{1.message.chat.id}}"
-                      },
-                      "module": "telegram:SendReplyMessage",
-                      "onerror": [
-                        {
-                          "id": 222,
-                          "mapper": {},
-                          "module": "builtin:Ignore",
-                          "version": 1,
-                          "metadata": {
-                            "designer": {
-                              "x": 0,
-                              "y": 0
-                            }
-                          },
-                          "parameters": {}
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {
-                        "__IMTCONN__": 10719081
-                      }
-                    },
-                    {
-                      "id": 223,
-                      "mapper": {
-                        "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
-                        "data": {
-                          "role": "assistant",
-                          "text": "That's not yours to change.",
-                          "chat_id": "{{1.message.chat.id}}",
-                          "timestamp": "{{now}}"
-                        },
-                        "overwrite": true
-                      },
-                      "module": "datastore:AddRecord",
-                      "onerror": [
-                        {
-                          "id": 224,
-                          "mapper": {},
-                          "module": "builtin:Ignore",
-                          "version": 1,
-                          "metadata": {
-                            "designer": {
-                              "x": 0,
-                              "y": 0
-                            }
-                          },
-                          "parameters": {}
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {
-                        "datastore": 140069
                       }
                     }
                   ]
@@ -1062,13 +840,13 @@
         {
           "flow": [
             {
-              "id": 226,
+              "id": 508,
               "filter": {
-                "name": "Is a delete_fact action",
+                "name": "type=delete_fact",
                 "conditions": [
                   [
                     {
-                      "a": "{{21.action.type}}",
+                      "a": "{{499.type}}",
                       "b": "delete_fact",
                       "o": "text:equal:ci"
                     }
@@ -1076,33 +854,15 @@
                 ]
               },
               "mapper": {
-                "key": "{{21.action.id}}",
+                "key": "{{499.id}}",
                 "returnWrapped": false
               },
               "module": "datastore:GetRecord",
               "onerror": [
                 {
-                  "id": 227,
-                  "mapper": {
-                    "text": "Couldn't find that - what did you mean?",
-                    "chatId": "{{1.message.chat.id}}"
-                  },
-                  "module": "telegram:SendReplyMessage",
-                  "onerror": [
-                    {
-                      "id": 228,
-                      "mapper": {},
-                      "module": "builtin:Ignore",
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {}
-                    }
-                  ],
+                  "id": 509,
+                  "mapper": {},
+                  "module": "builtin:Ignore",
                   "version": 1,
                   "metadata": {
                     "designer": {
@@ -1110,9 +870,7 @@
                       "y": 0
                     }
                   },
-                  "parameters": {
-                    "__IMTCONN__": 10719081
-                  }
+                  "parameters": {}
                 }
               ],
               "version": 1,
@@ -1127,20 +885,20 @@
               }
             },
             {
-              "id": 238,
+              "id": 510,
               "mapper": {},
               "module": "builtin:BasicRouter",
               "routes": [
                 {
                   "flow": [
                     {
-                      "id": 229,
+                      "id": 511,
                       "filter": {
-                        "name": "Owns record",
+                        "name": "Owns",
                         "conditions": [
                           [
                             {
-                              "a": "{{226.chat_id}}",
+                              "a": "{{508.chat_id}}",
                               "b": "{{1.message.chat.id}}",
                               "o": "number:equal"
                             }
@@ -1148,9 +906,24 @@
                         ]
                       },
                       "mapper": {
-                        "key": "{{21.action.id}}"
+                        "key": "{{499.id}}"
                       },
                       "module": "datastore:DeleteRecord",
+                      "onerror": [
+                        {
+                          "id": 5111,
+                          "mapper": {},
+                          "module": "builtin:Ignore",
+                          "version": 1,
+                          "metadata": {
+                            "designer": {
+                              "x": 0,
+                              "y": 0
+                            }
+                          },
+                          "parameters": {}
+                        }
+                      ],
                       "version": 1,
                       "metadata": {
                         "designer": {
@@ -1161,166 +934,6 @@
                       "parameters": {
                         "datastore": 140068
                       }
-                    },
-                    {
-                      "id": 230,
-                      "mapper": {
-                        "text": "{{21.text}}",
-                        "chatId": "{{1.message.chat.id}}"
-                      },
-                      "module": "telegram:SendReplyMessage",
-                      "onerror": [
-                        {
-                          "id": 231,
-                          "mapper": {},
-                          "module": "builtin:Ignore",
-                          "version": 1,
-                          "metadata": {
-                            "designer": {
-                              "x": 0,
-                              "y": 0
-                            }
-                          },
-                          "parameters": {}
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {
-                        "__IMTCONN__": 10719081
-                      }
-                    },
-                    {
-                      "id": 232,
-                      "mapper": {
-                        "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
-                        "data": {
-                          "role": "assistant",
-                          "text": "{{21.text}}",
-                          "chat_id": "{{1.message.chat.id}}",
-                          "timestamp": "{{now}}"
-                        },
-                        "overwrite": true
-                      },
-                      "module": "datastore:AddRecord",
-                      "onerror": [
-                        {
-                          "id": 233,
-                          "mapper": {},
-                          "module": "builtin:Ignore",
-                          "version": 1,
-                          "metadata": {
-                            "designer": {
-                              "x": 0,
-                              "y": 0
-                            }
-                          },
-                          "parameters": {}
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {
-                        "datastore": 140069
-                      }
-                    }
-                  ]
-                },
-                {
-                  "flow": [
-                    {
-                      "id": 234,
-                      "filter": {
-                        "name": "Not owner",
-                        "conditions": [
-                          [
-                            {
-                              "a": "{{226.chat_id}}",
-                              "b": "{{1.message.chat.id}}",
-                              "o": "number:notequal"
-                            }
-                          ]
-                        ]
-                      },
-                      "mapper": {
-                        "text": "That's not yours to change.",
-                        "chatId": "{{1.message.chat.id}}"
-                      },
-                      "module": "telegram:SendReplyMessage",
-                      "onerror": [
-                        {
-                          "id": 235,
-                          "mapper": {},
-                          "module": "builtin:Ignore",
-                          "version": 1,
-                          "metadata": {
-                            "designer": {
-                              "x": 0,
-                              "y": 0
-                            }
-                          },
-                          "parameters": {}
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {
-                        "__IMTCONN__": 10719081
-                      }
-                    },
-                    {
-                      "id": 236,
-                      "mapper": {
-                        "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
-                        "data": {
-                          "role": "assistant",
-                          "text": "That's not yours to change.",
-                          "chat_id": "{{1.message.chat.id}}",
-                          "timestamp": "{{now}}"
-                        },
-                        "overwrite": true
-                      },
-                      "module": "datastore:AddRecord",
-                      "onerror": [
-                        {
-                          "id": 237,
-                          "mapper": {},
-                          "module": "builtin:Ignore",
-                          "version": 1,
-                          "metadata": {
-                            "designer": {
-                              "x": 0,
-                              "y": 0
-                            }
-                          },
-                          "parameters": {}
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {
-                        "datastore": 140069
-                      }
                     }
                   ]
                 }
@@ -1339,13 +952,13 @@
         {
           "flow": [
             {
-              "id": 239,
+              "id": 512,
               "filter": {
-                "name": "Is a add_task action",
+                "name": "type=add_task",
                 "conditions": [
                   [
                     {
-                      "a": "{{21.action.type}}",
+                      "a": "{{499.type}}",
                       "b": "add_task",
                       "o": "text:equal:ci"
                     }
@@ -1353,33 +966,15 @@
                 ]
               },
               "mapper": {
-                "key": "{{21.action.assignee_id}}",
+                "key": "{{499.assignee_id}}",
                 "returnWrapped": false
               },
               "module": "datastore:GetRecord",
               "onerror": [
                 {
-                  "id": 240,
-                  "mapper": {
-                    "text": "I don't recognize that person - who did you mean?",
-                    "chatId": "{{1.message.chat.id}}"
-                  },
-                  "module": "telegram:SendReplyMessage",
-                  "onerror": [
-                    {
-                      "id": 241,
-                      "mapper": {},
-                      "module": "builtin:Ignore",
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {}
-                    }
-                  ],
+                  "id": 513,
+                  "mapper": {},
+                  "module": "builtin:Ignore",
                   "version": 1,
                   "metadata": {
                     "designer": {
@@ -1387,9 +982,7 @@
                       "y": 0
                     }
                   },
-                  "parameters": {
-                    "__IMTCONN__": 10719081
-                  }
+                  "parameters": {}
                 }
               ],
               "version": 1,
@@ -1404,22 +997,22 @@
               }
             },
             {
-              "id": 242,
+              "id": 514,
               "mapper": {
                 "data": {
                   "status": "todo",
-                  "due_date": "{{21.action.due_date}}",
-                  "priority": "{{ifempty(21.action.priority;\"medium\")}}",
-                  "assignee_id": "{{21.action.assignee_id}}",
+                  "due_date": "{{499.due_date}}",
+                  "priority": "{{ifempty(499.priority;\"medium\")}}",
+                  "assignee_id": "{{499.assignee_id}}",
                   "assigner_id": "{{1.message.chat.id}}",
-                  "description": "{{21.action.task}}"
+                  "description": "{{499.task}}"
                 },
                 "overwrite": false
               },
               "module": "datastore:AddRecord",
               "onerror": [
                 {
-                  "id": 243,
+                  "id": 5141,
                   "mapper": {},
                   "module": "builtin:Ignore",
                   "version": 1,
@@ -1442,91 +1035,19 @@
               "parameters": {
                 "datastore": 140070
               }
-            },
-            {
-              "id": 244,
-              "mapper": {
-                "text": "{{21.text}}",
-                "chatId": "{{1.message.chat.id}}"
-              },
-              "module": "telegram:SendReplyMessage",
-              "onerror": [
-                {
-                  "id": 245,
-                  "mapper": {},
-                  "module": "builtin:Ignore",
-                  "version": 1,
-                  "metadata": {
-                    "designer": {
-                      "x": 0,
-                      "y": 0
-                    }
-                  },
-                  "parameters": {}
-                }
-              ],
-              "version": 1,
-              "metadata": {
-                "designer": {
-                  "x": 0,
-                  "y": 0
-                }
-              },
-              "parameters": {
-                "__IMTCONN__": 10719081
-              }
-            },
-            {
-              "id": 246,
-              "mapper": {
-                "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
-                "data": {
-                  "role": "assistant",
-                  "text": "{{21.text}}",
-                  "chat_id": "{{1.message.chat.id}}",
-                  "timestamp": "{{now}}"
-                },
-                "overwrite": true
-              },
-              "module": "datastore:AddRecord",
-              "onerror": [
-                {
-                  "id": 247,
-                  "mapper": {},
-                  "module": "builtin:Ignore",
-                  "version": 1,
-                  "metadata": {
-                    "designer": {
-                      "x": 0,
-                      "y": 0
-                    }
-                  },
-                  "parameters": {}
-                }
-              ],
-              "version": 1,
-              "metadata": {
-                "designer": {
-                  "x": 0,
-                  "y": 0
-                }
-              },
-              "parameters": {
-                "datastore": 140069
-              }
             }
           ]
         },
         {
           "flow": [
             {
-              "id": 248,
+              "id": 516,
               "filter": {
-                "name": "Is a update_task action",
+                "name": "type=update_task",
                 "conditions": [
                   [
                     {
-                      "a": "{{21.action.type}}",
+                      "a": "{{499.type}}",
                       "b": "update_task",
                       "o": "text:equal:ci"
                     }
@@ -1534,33 +1055,15 @@
                 ]
               },
               "mapper": {
-                "key": "{{21.action.id}}",
+                "key": "{{499.id}}",
                 "returnWrapped": false
               },
               "module": "datastore:GetRecord",
               "onerror": [
                 {
-                  "id": 249,
-                  "mapper": {
-                    "text": "Couldn't find that task.",
-                    "chatId": "{{1.message.chat.id}}"
-                  },
-                  "module": "telegram:SendReplyMessage",
-                  "onerror": [
-                    {
-                      "id": 250,
-                      "mapper": {},
-                      "module": "builtin:Ignore",
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {}
-                    }
-                  ],
+                  "id": 517,
+                  "mapper": {},
+                  "module": "builtin:Ignore",
                   "version": 1,
                   "metadata": {
                     "designer": {
@@ -1568,9 +1071,7 @@
                       "y": 0
                     }
                   },
-                  "parameters": {
-                    "__IMTCONN__": 10719081
-                  }
+                  "parameters": {}
                 }
               ],
               "version": 1,
@@ -1585,27 +1086,27 @@
               }
             },
             {
-              "id": 260,
+              "id": 518,
               "mapper": {},
               "module": "builtin:BasicRouter",
               "routes": [
                 {
                   "flow": [
                     {
-                      "id": 251,
+                      "id": 519,
                       "filter": {
-                        "name": "Owns task",
+                        "name": "Owns",
                         "conditions": [
                           [
                             {
-                              "a": "{{248.assignee_id}}",
+                              "a": "{{516.assignee_id}}",
                               "b": "{{1.message.chat.id}}",
                               "o": "number:equal"
                             }
                           ],
                           [
                             {
-                              "a": "{{248.assigner_id}}",
+                              "a": "{{516.assigner_id}}",
                               "b": "{{1.message.chat.id}}",
                               "o": "number:equal"
                             }
@@ -1613,13 +1114,28 @@
                         ]
                       },
                       "mapper": {
-                        "key": "{{21.action.id}}",
+                        "key": "{{499.id}}",
                         "data": {
-                          "status": "{{21.action.status}}"
+                          "status": "{{499.status}}"
                         },
                         "upsert": false
                       },
                       "module": "datastore:UpdateRecord",
+                      "onerror": [
+                        {
+                          "id": 5191,
+                          "mapper": {},
+                          "module": "builtin:Ignore",
+                          "version": 1,
+                          "metadata": {
+                            "designer": {
+                              "x": 0,
+                              "y": 0
+                            }
+                          },
+                          "parameters": {}
+                        }
+                      ],
                       "version": 1,
                       "metadata": {
                         "designer": {
@@ -1629,171 +1145,6 @@
                       },
                       "parameters": {
                         "datastore": 140070
-                      }
-                    },
-                    {
-                      "id": 252,
-                      "mapper": {
-                        "text": "{{21.text}}",
-                        "chatId": "{{1.message.chat.id}}"
-                      },
-                      "module": "telegram:SendReplyMessage",
-                      "onerror": [
-                        {
-                          "id": 253,
-                          "mapper": {},
-                          "module": "builtin:Ignore",
-                          "version": 1,
-                          "metadata": {
-                            "designer": {
-                              "x": 0,
-                              "y": 0
-                            }
-                          },
-                          "parameters": {}
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {
-                        "__IMTCONN__": 10719081
-                      }
-                    },
-                    {
-                      "id": 254,
-                      "mapper": {
-                        "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
-                        "data": {
-                          "role": "assistant",
-                          "text": "{{21.text}}",
-                          "chat_id": "{{1.message.chat.id}}",
-                          "timestamp": "{{now}}"
-                        },
-                        "overwrite": true
-                      },
-                      "module": "datastore:AddRecord",
-                      "onerror": [
-                        {
-                          "id": 255,
-                          "mapper": {},
-                          "module": "builtin:Ignore",
-                          "version": 1,
-                          "metadata": {
-                            "designer": {
-                              "x": 0,
-                              "y": 0
-                            }
-                          },
-                          "parameters": {}
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {
-                        "datastore": 140069
-                      }
-                    }
-                  ]
-                },
-                {
-                  "flow": [
-                    {
-                      "id": 256,
-                      "filter": {
-                        "name": "Not a party",
-                        "conditions": [
-                          [
-                            {
-                              "a": "{{248.assignee_id}}",
-                              "b": "{{1.message.chat.id}}",
-                              "o": "number:notequal"
-                            },
-                            {
-                              "a": "{{248.assigner_id}}",
-                              "b": "{{1.message.chat.id}}",
-                              "o": "number:notequal"
-                            }
-                          ]
-                        ]
-                      },
-                      "mapper": {
-                        "text": "That's not yours to change.",
-                        "chatId": "{{1.message.chat.id}}"
-                      },
-                      "module": "telegram:SendReplyMessage",
-                      "onerror": [
-                        {
-                          "id": 257,
-                          "mapper": {},
-                          "module": "builtin:Ignore",
-                          "version": 1,
-                          "metadata": {
-                            "designer": {
-                              "x": 0,
-                              "y": 0
-                            }
-                          },
-                          "parameters": {}
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {
-                        "__IMTCONN__": 10719081
-                      }
-                    },
-                    {
-                      "id": 258,
-                      "mapper": {
-                        "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
-                        "data": {
-                          "role": "assistant",
-                          "text": "That's not yours to change.",
-                          "chat_id": "{{1.message.chat.id}}",
-                          "timestamp": "{{now}}"
-                        },
-                        "overwrite": true
-                      },
-                      "module": "datastore:AddRecord",
-                      "onerror": [
-                        {
-                          "id": 259,
-                          "mapper": {},
-                          "module": "builtin:Ignore",
-                          "version": 1,
-                          "metadata": {
-                            "designer": {
-                              "x": 0,
-                              "y": 0
-                            }
-                          },
-                          "parameters": {}
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {
-                        "datastore": 140069
                       }
                     }
                   ]
@@ -1813,13 +1164,13 @@
         {
           "flow": [
             {
-              "id": 261,
+              "id": 520,
               "filter": {
-                "name": "Is a delete_task action",
+                "name": "type=delete_task",
                 "conditions": [
                   [
                     {
-                      "a": "{{21.action.type}}",
+                      "a": "{{499.type}}",
                       "b": "delete_task",
                       "o": "text:equal:ci"
                     }
@@ -1827,33 +1178,15 @@
                 ]
               },
               "mapper": {
-                "key": "{{21.action.id}}",
+                "key": "{{499.id}}",
                 "returnWrapped": false
               },
               "module": "datastore:GetRecord",
               "onerror": [
                 {
-                  "id": 262,
-                  "mapper": {
-                    "text": "Couldn't find that task.",
-                    "chatId": "{{1.message.chat.id}}"
-                  },
-                  "module": "telegram:SendReplyMessage",
-                  "onerror": [
-                    {
-                      "id": 263,
-                      "mapper": {},
-                      "module": "builtin:Ignore",
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {}
-                    }
-                  ],
+                  "id": 521,
+                  "mapper": {},
+                  "module": "builtin:Ignore",
                   "version": 1,
                   "metadata": {
                     "designer": {
@@ -1861,9 +1194,7 @@
                       "y": 0
                     }
                   },
-                  "parameters": {
-                    "__IMTCONN__": 10719081
-                  }
+                  "parameters": {}
                 }
               ],
               "version": 1,
@@ -1878,27 +1209,27 @@
               }
             },
             {
-              "id": 273,
+              "id": 522,
               "mapper": {},
               "module": "builtin:BasicRouter",
               "routes": [
                 {
                   "flow": [
                     {
-                      "id": 264,
+                      "id": 523,
                       "filter": {
-                        "name": "Owns task",
+                        "name": "Owns",
                         "conditions": [
                           [
                             {
-                              "a": "{{261.assignee_id}}",
+                              "a": "{{520.assignee_id}}",
                               "b": "{{1.message.chat.id}}",
                               "o": "number:equal"
                             }
                           ],
                           [
                             {
-                              "a": "{{261.assigner_id}}",
+                              "a": "{{520.assigner_id}}",
                               "b": "{{1.message.chat.id}}",
                               "o": "number:equal"
                             }
@@ -1906,9 +1237,24 @@
                         ]
                       },
                       "mapper": {
-                        "key": "{{21.action.id}}"
+                        "key": "{{499.id}}"
                       },
                       "module": "datastore:DeleteRecord",
+                      "onerror": [
+                        {
+                          "id": 5231,
+                          "mapper": {},
+                          "module": "builtin:Ignore",
+                          "version": 1,
+                          "metadata": {
+                            "designer": {
+                              "x": 0,
+                              "y": 0
+                            }
+                          },
+                          "parameters": {}
+                        }
+                      ],
                       "version": 1,
                       "metadata": {
                         "designer": {
@@ -1918,171 +1264,6 @@
                       },
                       "parameters": {
                         "datastore": 140070
-                      }
-                    },
-                    {
-                      "id": 265,
-                      "mapper": {
-                        "text": "{{21.text}}",
-                        "chatId": "{{1.message.chat.id}}"
-                      },
-                      "module": "telegram:SendReplyMessage",
-                      "onerror": [
-                        {
-                          "id": 266,
-                          "mapper": {},
-                          "module": "builtin:Ignore",
-                          "version": 1,
-                          "metadata": {
-                            "designer": {
-                              "x": 0,
-                              "y": 0
-                            }
-                          },
-                          "parameters": {}
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {
-                        "__IMTCONN__": 10719081
-                      }
-                    },
-                    {
-                      "id": 267,
-                      "mapper": {
-                        "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
-                        "data": {
-                          "role": "assistant",
-                          "text": "{{21.text}}",
-                          "chat_id": "{{1.message.chat.id}}",
-                          "timestamp": "{{now}}"
-                        },
-                        "overwrite": true
-                      },
-                      "module": "datastore:AddRecord",
-                      "onerror": [
-                        {
-                          "id": 268,
-                          "mapper": {},
-                          "module": "builtin:Ignore",
-                          "version": 1,
-                          "metadata": {
-                            "designer": {
-                              "x": 0,
-                              "y": 0
-                            }
-                          },
-                          "parameters": {}
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {
-                        "datastore": 140069
-                      }
-                    }
-                  ]
-                },
-                {
-                  "flow": [
-                    {
-                      "id": 269,
-                      "filter": {
-                        "name": "Not a party",
-                        "conditions": [
-                          [
-                            {
-                              "a": "{{261.assignee_id}}",
-                              "b": "{{1.message.chat.id}}",
-                              "o": "number:notequal"
-                            },
-                            {
-                              "a": "{{261.assigner_id}}",
-                              "b": "{{1.message.chat.id}}",
-                              "o": "number:notequal"
-                            }
-                          ]
-                        ]
-                      },
-                      "mapper": {
-                        "text": "That's not yours to change.",
-                        "chatId": "{{1.message.chat.id}}"
-                      },
-                      "module": "telegram:SendReplyMessage",
-                      "onerror": [
-                        {
-                          "id": 270,
-                          "mapper": {},
-                          "module": "builtin:Ignore",
-                          "version": 1,
-                          "metadata": {
-                            "designer": {
-                              "x": 0,
-                              "y": 0
-                            }
-                          },
-                          "parameters": {}
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {
-                        "__IMTCONN__": 10719081
-                      }
-                    },
-                    {
-                      "id": 271,
-                      "mapper": {
-                        "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
-                        "data": {
-                          "role": "assistant",
-                          "text": "That's not yours to change.",
-                          "chat_id": "{{1.message.chat.id}}",
-                          "timestamp": "{{now}}"
-                        },
-                        "overwrite": true
-                      },
-                      "module": "datastore:AddRecord",
-                      "onerror": [
-                        {
-                          "id": 272,
-                          "mapper": {},
-                          "module": "builtin:Ignore",
-                          "version": 1,
-                          "metadata": {
-                            "designer": {
-                              "x": 0,
-                              "y": 0
-                            }
-                          },
-                          "parameters": {}
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {
-                        "datastore": 140069
                       }
                     }
                   ]
@@ -2102,13 +1283,13 @@
         {
           "flow": [
             {
-              "id": 274,
+              "id": 524,
               "filter": {
-                "name": "Is a add_reminder action",
+                "name": "type=add_reminder",
                 "conditions": [
                   [
                     {
-                      "a": "{{21.action.type}}",
+                      "a": "{{499.type}}",
                       "b": "add_reminder",
                       "o": "text:equal:ci"
                     }
@@ -2116,33 +1297,15 @@
                 ]
               },
               "mapper": {
-                "key": "{{21.action.target_chat_id}}",
+                "key": "{{499.target_chat_id}}",
                 "returnWrapped": false
               },
               "module": "datastore:GetRecord",
               "onerror": [
                 {
-                  "id": 275,
-                  "mapper": {
-                    "text": "I don't recognize that person - who did you mean?",
-                    "chatId": "{{1.message.chat.id}}"
-                  },
-                  "module": "telegram:SendReplyMessage",
-                  "onerror": [
-                    {
-                      "id": 276,
-                      "mapper": {},
-                      "module": "builtin:Ignore",
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {}
-                    }
-                  ],
+                  "id": 525,
+                  "mapper": {},
+                  "module": "builtin:Ignore",
                   "version": 1,
                   "metadata": {
                     "designer": {
@@ -2150,9 +1313,7 @@
                       "y": 0
                     }
                   },
-                  "parameters": {
-                    "__IMTCONN__": 10719081
-                  }
+                  "parameters": {}
                 }
               ],
               "version": 1,
@@ -2167,13 +1328,13 @@
               }
             },
             {
-              "id": 277,
+              "id": 526,
               "mapper": {
                 "data": {
-                  "text": "{{21.action.text}}",
+                  "text": "{{499.text}}",
                   "status": "pending",
-                  "remind_at": "{{parseDate(21.action.remind_at; \"YYYY-MM-DDTHH:mm:ss\"; \"Asia/Kuala_Lumpur\")}}",
-                  "target_chat_id": "{{21.action.target_chat_id}}",
+                  "remind_at": "{{parseDate(499.remind_at; \"YYYY-MM-DDTHH:mm:ss\"; \"Asia/Kuala_Lumpur\")}}",
+                  "target_chat_id": "{{499.target_chat_id}}",
                   "created_by_chat_id": "{{1.message.chat.id}}"
                 },
                 "overwrite": false
@@ -2181,7 +1342,7 @@
               "module": "datastore:AddRecord",
               "onerror": [
                 {
-                  "id": 278,
+                  "id": 5261,
                   "mapper": {},
                   "module": "builtin:Ignore",
                   "version": 1,
@@ -2204,91 +1365,19 @@
               "parameters": {
                 "datastore": 140071
               }
-            },
-            {
-              "id": 279,
-              "mapper": {
-                "text": "{{21.text}}",
-                "chatId": "{{1.message.chat.id}}"
-              },
-              "module": "telegram:SendReplyMessage",
-              "onerror": [
-                {
-                  "id": 280,
-                  "mapper": {},
-                  "module": "builtin:Ignore",
-                  "version": 1,
-                  "metadata": {
-                    "designer": {
-                      "x": 0,
-                      "y": 0
-                    }
-                  },
-                  "parameters": {}
-                }
-              ],
-              "version": 1,
-              "metadata": {
-                "designer": {
-                  "x": 0,
-                  "y": 0
-                }
-              },
-              "parameters": {
-                "__IMTCONN__": 10719081
-              }
-            },
-            {
-              "id": 281,
-              "mapper": {
-                "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
-                "data": {
-                  "role": "assistant",
-                  "text": "{{21.text}}",
-                  "chat_id": "{{1.message.chat.id}}",
-                  "timestamp": "{{now}}"
-                },
-                "overwrite": true
-              },
-              "module": "datastore:AddRecord",
-              "onerror": [
-                {
-                  "id": 282,
-                  "mapper": {},
-                  "module": "builtin:Ignore",
-                  "version": 1,
-                  "metadata": {
-                    "designer": {
-                      "x": 0,
-                      "y": 0
-                    }
-                  },
-                  "parameters": {}
-                }
-              ],
-              "version": 1,
-              "metadata": {
-                "designer": {
-                  "x": 0,
-                  "y": 0
-                }
-              },
-              "parameters": {
-                "datastore": 140069
-              }
             }
           ]
         },
         {
           "flow": [
             {
-              "id": 283,
+              "id": 528,
               "filter": {
-                "name": "Is a update_reminder action",
+                "name": "type=update_reminder",
                 "conditions": [
                   [
                     {
-                      "a": "{{21.action.type}}",
+                      "a": "{{499.type}}",
                       "b": "update_reminder",
                       "o": "text:equal:ci"
                     }
@@ -2296,33 +1385,15 @@
                 ]
               },
               "mapper": {
-                "key": "{{21.action.id}}",
+                "key": "{{499.id}}",
                 "returnWrapped": false
               },
               "module": "datastore:GetRecord",
               "onerror": [
                 {
-                  "id": 284,
-                  "mapper": {
-                    "text": "Couldn't find that reminder.",
-                    "chatId": "{{1.message.chat.id}}"
-                  },
-                  "module": "telegram:SendReplyMessage",
-                  "onerror": [
-                    {
-                      "id": 285,
-                      "mapper": {},
-                      "module": "builtin:Ignore",
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {}
-                    }
-                  ],
+                  "id": 529,
+                  "mapper": {},
+                  "module": "builtin:Ignore",
                   "version": 1,
                   "metadata": {
                     "designer": {
@@ -2330,9 +1401,7 @@
                       "y": 0
                     }
                   },
-                  "parameters": {
-                    "__IMTCONN__": 10719081
-                  }
+                  "parameters": {}
                 }
               ],
               "version": 1,
@@ -2347,314 +1416,55 @@
               }
             },
             {
-              "id": 300,
+              "id": 530,
               "mapper": {},
               "module": "builtin:BasicRouter",
               "routes": [
                 {
                   "flow": [
                     {
-                      "id": 295,
+                      "id": 531,
                       "filter": {
-                        "name": "Still pending",
+                        "name": "Still pending and owns",
                         "conditions": [
                           [
                             {
-                              "a": "{{283.status}}",
+                              "a": "{{528.status}}",
                               "b": "pending",
                               "o": "text:equal"
-                            }
-                          ]
-                        ]
-                      },
-                      "mapper": {},
-                      "module": "builtin:BasicRouter",
-                      "routes": [
-                        {
-                          "flow": [
-                            {
-                              "id": 286,
-                              "filter": {
-                                "name": "Owns pending reminder",
-                                "conditions": [
-                                  [
-                                    {
-                                      "a": "{{283.target_chat_id}}",
-                                      "b": "{{1.message.chat.id}}",
-                                      "o": "number:equal"
-                                    }
-                                  ],
-                                  [
-                                    {
-                                      "a": "{{283.created_by_chat_id}}",
-                                      "b": "{{1.message.chat.id}}",
-                                      "o": "number:equal"
-                                    }
-                                  ]
-                                ]
-                              },
-                              "mapper": {
-                                "key": "{{21.action.id}}",
-                                "data": {
-                                  "text": "{{ifempty(21.action.text; 283.text)}}",
-                                  "remind_at": "{{ifempty(parseDate(21.action.remind_at; \"YYYY-MM-DDTHH:mm:ss\"; \"Asia/Kuala_Lumpur\"); 283.remind_at)}}"
-                                },
-                                "upsert": false
-                              },
-                              "module": "datastore:UpdateRecord",
-                              "version": 1,
-                              "metadata": {
-                                "designer": {
-                                  "x": 0,
-                                  "y": 0
-                                }
-                              },
-                              "parameters": {
-                                "datastore": 140071
-                              }
                             },
                             {
-                              "id": 287,
-                              "mapper": {
-                                "text": "{{21.text}}",
-                                "chatId": "{{1.message.chat.id}}"
-                              },
-                              "module": "telegram:SendReplyMessage",
-                              "onerror": [
-                                {
-                                  "id": 288,
-                                  "mapper": {},
-                                  "module": "builtin:Ignore",
-                                  "version": 1,
-                                  "metadata": {
-                                    "designer": {
-                                      "x": 0,
-                                      "y": 0
-                                    }
-                                  },
-                                  "parameters": {}
-                                }
-                              ],
-                              "version": 1,
-                              "metadata": {
-                                "designer": {
-                                  "x": 0,
-                                  "y": 0
-                                }
-                              },
-                              "parameters": {
-                                "__IMTCONN__": 10719081
-                              }
-                            },
-                            {
-                              "id": 289,
-                              "mapper": {
-                                "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
-                                "data": {
-                                  "role": "assistant",
-                                  "text": "{{21.text}}",
-                                  "chat_id": "{{1.message.chat.id}}",
-                                  "timestamp": "{{now}}"
-                                },
-                                "overwrite": true
-                              },
-                              "module": "datastore:AddRecord",
-                              "onerror": [
-                                {
-                                  "id": 290,
-                                  "mapper": {},
-                                  "module": "builtin:Ignore",
-                                  "version": 1,
-                                  "metadata": {
-                                    "designer": {
-                                      "x": 0,
-                                      "y": 0
-                                    }
-                                  },
-                                  "parameters": {}
-                                }
-                              ],
-                              "version": 1,
-                              "metadata": {
-                                "designer": {
-                                  "x": 0,
-                                  "y": 0
-                                }
-                              },
-                              "parameters": {
-                                "datastore": 140069
-                              }
+                              "a": "{{528.target_chat_id}}",
+                              "b": "{{1.message.chat.id}}",
+                              "o": "number:equal"
                             }
-                          ]
-                        },
-                        {
-                          "flow": [
-                            {
-                              "id": 291,
-                              "filter": {
-                                "name": "Not a party",
-                                "conditions": [
-                                  [
-                                    {
-                                      "a": "{{283.target_chat_id}}",
-                                      "b": "{{1.message.chat.id}}",
-                                      "o": "number:notequal"
-                                    },
-                                    {
-                                      "a": "{{283.created_by_chat_id}}",
-                                      "b": "{{1.message.chat.id}}",
-                                      "o": "number:notequal"
-                                    }
-                                  ]
-                                ]
-                              },
-                              "mapper": {
-                                "text": "That's not yours to change.",
-                                "chatId": "{{1.message.chat.id}}"
-                              },
-                              "module": "telegram:SendReplyMessage",
-                              "onerror": [
-                                {
-                                  "id": 292,
-                                  "mapper": {},
-                                  "module": "builtin:Ignore",
-                                  "version": 1,
-                                  "metadata": {
-                                    "designer": {
-                                      "x": 0,
-                                      "y": 0
-                                    }
-                                  },
-                                  "parameters": {}
-                                }
-                              ],
-                              "version": 1,
-                              "metadata": {
-                                "designer": {
-                                  "x": 0,
-                                  "y": 0
-                                }
-                              },
-                              "parameters": {
-                                "__IMTCONN__": 10719081
-                              }
-                            },
-                            {
-                              "id": 293,
-                              "mapper": {
-                                "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
-                                "data": {
-                                  "role": "assistant",
-                                  "text": "That's not yours to change.",
-                                  "chat_id": "{{1.message.chat.id}}",
-                                  "timestamp": "{{now}}"
-                                },
-                                "overwrite": true
-                              },
-                              "module": "datastore:AddRecord",
-                              "onerror": [
-                                {
-                                  "id": 294,
-                                  "mapper": {},
-                                  "module": "builtin:Ignore",
-                                  "version": 1,
-                                  "metadata": {
-                                    "designer": {
-                                      "x": 0,
-                                      "y": 0
-                                    }
-                                  },
-                                  "parameters": {}
-                                }
-                              ],
-                              "version": 1,
-                              "metadata": {
-                                "designer": {
-                                  "x": 0,
-                                  "y": 0
-                                }
-                              },
-                              "parameters": {
-                                "datastore": 140069
-                              }
-                            }
-                          ]
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {}
-                    }
-                  ]
-                },
-                {
-                  "flow": [
-                    {
-                      "id": 296,
-                      "filter": {
-                        "name": "Already sent",
-                        "conditions": [
+                          ],
                           [
                             {
-                              "a": "{{283.status}}",
+                              "a": "{{528.status}}",
                               "b": "pending",
-                              "o": "text:notequal"
+                              "o": "text:equal"
+                            },
+                            {
+                              "a": "{{528.created_by_chat_id}}",
+                              "b": "{{1.message.chat.id}}",
+                              "o": "number:equal"
                             }
                           ]
                         ]
                       },
                       "mapper": {
-                        "text": "That reminder's already been sent, can't change it now.",
-                        "chatId": "{{1.message.chat.id}}"
-                      },
-                      "module": "telegram:SendReplyMessage",
-                      "onerror": [
-                        {
-                          "id": 297,
-                          "mapper": {},
-                          "module": "builtin:Ignore",
-                          "version": 1,
-                          "metadata": {
-                            "designer": {
-                              "x": 0,
-                              "y": 0
-                            }
-                          },
-                          "parameters": {}
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {
-                        "__IMTCONN__": 10719081
-                      }
-                    },
-                    {
-                      "id": 298,
-                      "mapper": {
-                        "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
+                        "key": "{{499.id}}",
                         "data": {
-                          "role": "assistant",
-                          "text": "That reminder's already been sent, can't change it now.",
-                          "chat_id": "{{1.message.chat.id}}",
-                          "timestamp": "{{now}}"
+                          "text": "{{ifempty(499.text; 528.text)}}",
+                          "remind_at": "{{ifempty(parseDate(499.remind_at; \"YYYY-MM-DDTHH:mm:ss\"; \"Asia/Kuala_Lumpur\"); 528.remind_at)}}"
                         },
-                        "overwrite": true
+                        "upsert": false
                       },
-                      "module": "datastore:AddRecord",
+                      "module": "datastore:UpdateRecord",
                       "onerror": [
                         {
-                          "id": 299,
+                          "id": 5311,
                           "mapper": {},
                           "module": "builtin:Ignore",
                           "version": 1,
@@ -2675,7 +1485,7 @@
                         }
                       },
                       "parameters": {
-                        "datastore": 140069
+                        "datastore": 140071
                       }
                     }
                   ]
@@ -2695,13 +1505,13 @@
         {
           "flow": [
             {
-              "id": 301,
+              "id": 532,
               "filter": {
-                "name": "Is a cancel_reminder action",
+                "name": "type=cancel_reminder",
                 "conditions": [
                   [
                     {
-                      "a": "{{21.action.type}}",
+                      "a": "{{499.type}}",
                       "b": "cancel_reminder",
                       "o": "text:equal:ci"
                     }
@@ -2709,33 +1519,15 @@
                 ]
               },
               "mapper": {
-                "key": "{{21.action.id}}",
+                "key": "{{499.id}}",
                 "returnWrapped": false
               },
               "module": "datastore:GetRecord",
               "onerror": [
                 {
-                  "id": 302,
-                  "mapper": {
-                    "text": "Couldn't find that reminder.",
-                    "chatId": "{{1.message.chat.id}}"
-                  },
-                  "module": "telegram:SendReplyMessage",
-                  "onerror": [
-                    {
-                      "id": 303,
-                      "mapper": {},
-                      "module": "builtin:Ignore",
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {}
-                    }
-                  ],
+                  "id": 533,
+                  "mapper": {},
+                  "module": "builtin:Ignore",
                   "version": 1,
                   "metadata": {
                     "designer": {
@@ -2743,9 +1535,7 @@
                       "y": 0
                     }
                   },
-                  "parameters": {
-                    "__IMTCONN__": 10719081
-                  }
+                  "parameters": {}
                 }
               ],
               "version": 1,
@@ -2760,270 +1550,50 @@
               }
             },
             {
-              "id": 318,
+              "id": 534,
               "mapper": {},
               "module": "builtin:BasicRouter",
               "routes": [
                 {
                   "flow": [
                     {
-                      "id": 313,
+                      "id": 535,
                       "filter": {
-                        "name": "Still pending",
+                        "name": "Still pending and owns",
                         "conditions": [
                           [
                             {
-                              "a": "{{301.status}}",
+                              "a": "{{532.status}}",
                               "b": "pending",
                               "o": "text:equal"
-                            }
-                          ]
-                        ]
-                      },
-                      "mapper": {},
-                      "module": "builtin:BasicRouter",
-                      "routes": [
-                        {
-                          "flow": [
-                            {
-                              "id": 304,
-                              "filter": {
-                                "name": "Owns pending reminder",
-                                "conditions": [
-                                  [
-                                    {
-                                      "a": "{{301.target_chat_id}}",
-                                      "b": "{{1.message.chat.id}}",
-                                      "o": "number:equal"
-                                    }
-                                  ],
-                                  [
-                                    {
-                                      "a": "{{301.created_by_chat_id}}",
-                                      "b": "{{1.message.chat.id}}",
-                                      "o": "number:equal"
-                                    }
-                                  ]
-                                ]
-                              },
-                              "mapper": {
-                                "key": "{{21.action.id}}"
-                              },
-                              "module": "datastore:DeleteRecord",
-                              "version": 1,
-                              "metadata": {
-                                "designer": {
-                                  "x": 0,
-                                  "y": 0
-                                }
-                              },
-                              "parameters": {
-                                "datastore": 140071
-                              }
                             },
                             {
-                              "id": 305,
-                              "mapper": {
-                                "text": "{{21.text}}",
-                                "chatId": "{{1.message.chat.id}}"
-                              },
-                              "module": "telegram:SendReplyMessage",
-                              "onerror": [
-                                {
-                                  "id": 306,
-                                  "mapper": {},
-                                  "module": "builtin:Ignore",
-                                  "version": 1,
-                                  "metadata": {
-                                    "designer": {
-                                      "x": 0,
-                                      "y": 0
-                                    }
-                                  },
-                                  "parameters": {}
-                                }
-                              ],
-                              "version": 1,
-                              "metadata": {
-                                "designer": {
-                                  "x": 0,
-                                  "y": 0
-                                }
-                              },
-                              "parameters": {
-                                "__IMTCONN__": 10719081
-                              }
-                            },
-                            {
-                              "id": 307,
-                              "mapper": {
-                                "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
-                                "data": {
-                                  "role": "assistant",
-                                  "text": "{{21.text}}",
-                                  "chat_id": "{{1.message.chat.id}}",
-                                  "timestamp": "{{now}}"
-                                },
-                                "overwrite": true
-                              },
-                              "module": "datastore:AddRecord",
-                              "onerror": [
-                                {
-                                  "id": 308,
-                                  "mapper": {},
-                                  "module": "builtin:Ignore",
-                                  "version": 1,
-                                  "metadata": {
-                                    "designer": {
-                                      "x": 0,
-                                      "y": 0
-                                    }
-                                  },
-                                  "parameters": {}
-                                }
-                              ],
-                              "version": 1,
-                              "metadata": {
-                                "designer": {
-                                  "x": 0,
-                                  "y": 0
-                                }
-                              },
-                              "parameters": {
-                                "datastore": 140069
-                              }
+                              "a": "{{532.target_chat_id}}",
+                              "b": "{{1.message.chat.id}}",
+                              "o": "number:equal"
                             }
-                          ]
-                        },
-                        {
-                          "flow": [
-                            {
-                              "id": 309,
-                              "filter": {
-                                "name": "Not a party",
-                                "conditions": [
-                                  [
-                                    {
-                                      "a": "{{301.target_chat_id}}",
-                                      "b": "{{1.message.chat.id}}",
-                                      "o": "number:notequal"
-                                    },
-                                    {
-                                      "a": "{{301.created_by_chat_id}}",
-                                      "b": "{{1.message.chat.id}}",
-                                      "o": "number:notequal"
-                                    }
-                                  ]
-                                ]
-                              },
-                              "mapper": {
-                                "text": "That's not yours to change.",
-                                "chatId": "{{1.message.chat.id}}"
-                              },
-                              "module": "telegram:SendReplyMessage",
-                              "onerror": [
-                                {
-                                  "id": 310,
-                                  "mapper": {},
-                                  "module": "builtin:Ignore",
-                                  "version": 1,
-                                  "metadata": {
-                                    "designer": {
-                                      "x": 0,
-                                      "y": 0
-                                    }
-                                  },
-                                  "parameters": {}
-                                }
-                              ],
-                              "version": 1,
-                              "metadata": {
-                                "designer": {
-                                  "x": 0,
-                                  "y": 0
-                                }
-                              },
-                              "parameters": {
-                                "__IMTCONN__": 10719081
-                              }
-                            },
-                            {
-                              "id": 311,
-                              "mapper": {
-                                "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
-                                "data": {
-                                  "role": "assistant",
-                                  "text": "That's not yours to change.",
-                                  "chat_id": "{{1.message.chat.id}}",
-                                  "timestamp": "{{now}}"
-                                },
-                                "overwrite": true
-                              },
-                              "module": "datastore:AddRecord",
-                              "onerror": [
-                                {
-                                  "id": 312,
-                                  "mapper": {},
-                                  "module": "builtin:Ignore",
-                                  "version": 1,
-                                  "metadata": {
-                                    "designer": {
-                                      "x": 0,
-                                      "y": 0
-                                    }
-                                  },
-                                  "parameters": {}
-                                }
-                              ],
-                              "version": 1,
-                              "metadata": {
-                                "designer": {
-                                  "x": 0,
-                                  "y": 0
-                                }
-                              },
-                              "parameters": {
-                                "datastore": 140069
-                              }
-                            }
-                          ]
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {}
-                    }
-                  ]
-                },
-                {
-                  "flow": [
-                    {
-                      "id": 314,
-                      "filter": {
-                        "name": "Already sent",
-                        "conditions": [
+                          ],
                           [
                             {
-                              "a": "{{301.status}}",
+                              "a": "{{532.status}}",
                               "b": "pending",
-                              "o": "text:notequal"
+                              "o": "text:equal"
+                            },
+                            {
+                              "a": "{{532.created_by_chat_id}}",
+                              "b": "{{1.message.chat.id}}",
+                              "o": "number:equal"
                             }
                           ]
                         ]
                       },
                       "mapper": {
-                        "text": "That reminder's already been sent, nothing to cancel.",
-                        "chatId": "{{1.message.chat.id}}"
+                        "key": "{{499.id}}"
                       },
-                      "module": "telegram:SendReplyMessage",
+                      "module": "datastore:DeleteRecord",
                       "onerror": [
                         {
-                          "id": 315,
+                          "id": 5351,
                           "mapper": {},
                           "module": "builtin:Ignore",
                           "version": 1,
@@ -3044,46 +1614,7 @@
                         }
                       },
                       "parameters": {
-                        "__IMTCONN__": 10719081
-                      }
-                    },
-                    {
-                      "id": 316,
-                      "mapper": {
-                        "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
-                        "data": {
-                          "role": "assistant",
-                          "text": "That reminder's already been sent, nothing to cancel.",
-                          "chat_id": "{{1.message.chat.id}}",
-                          "timestamp": "{{now}}"
-                        },
-                        "overwrite": true
-                      },
-                      "module": "datastore:AddRecord",
-                      "onerror": [
-                        {
-                          "id": 317,
-                          "mapper": {},
-                          "module": "builtin:Ignore",
-                          "version": 1,
-                          "metadata": {
-                            "designer": {
-                              "x": 0,
-                              "y": 0
-                            }
-                          },
-                          "parameters": {}
-                        }
-                      ],
-                      "version": 1,
-                      "metadata": {
-                        "designer": {
-                          "x": 0,
-                          "y": 0
-                        }
-                      },
-                      "parameters": {
-                        "datastore": 140069
+                        "datastore": 140071
                       }
                     }
                   ]
@@ -3097,93 +1628,6 @@
                 }
               },
               "parameters": {}
-            }
-          ]
-        },
-        {
-          "flow": [
-            {
-              "id": 319,
-              "filter": {
-                "name": "No action",
-                "conditions": [
-                  [
-                    {
-                      "a": "{{21.action.type}}",
-                      "o": "notexist"
-                    }
-                  ]
-                ]
-              },
-              "mapper": {
-                "text": "{{21.text}}",
-                "chatId": "{{1.message.chat.id}}"
-              },
-              "module": "telegram:SendReplyMessage",
-              "onerror": [
-                {
-                  "id": 320,
-                  "mapper": {},
-                  "module": "builtin:Ignore",
-                  "version": 1,
-                  "metadata": {
-                    "designer": {
-                      "x": 0,
-                      "y": 0
-                    }
-                  },
-                  "parameters": {}
-                }
-              ],
-              "version": 1,
-              "metadata": {
-                "designer": {
-                  "x": 0,
-                  "y": 0
-                }
-              },
-              "parameters": {
-                "__IMTCONN__": 10719081
-              }
-            },
-            {
-              "id": 321,
-              "mapper": {
-                "key": "{{1.message.chat.id}}_{{formatDate(now; \"x\")}}_assistant",
-                "data": {
-                  "role": "assistant",
-                  "text": "{{21.text}}",
-                  "chat_id": "{{1.message.chat.id}}",
-                  "timestamp": "{{now}}"
-                },
-                "overwrite": true
-              },
-              "module": "datastore:AddRecord",
-              "onerror": [
-                {
-                  "id": 322,
-                  "mapper": {},
-                  "module": "builtin:Ignore",
-                  "version": 1,
-                  "metadata": {
-                    "designer": {
-                      "x": 0,
-                      "y": 0
-                    }
-                  },
-                  "parameters": {}
-                }
-              ],
-              "version": 1,
-              "metadata": {
-                "designer": {
-                  "x": 0,
-                  "y": 0
-                }
-              },
-              "parameters": {
-                "datastore": 140069
-              }
             }
           ]
         }
