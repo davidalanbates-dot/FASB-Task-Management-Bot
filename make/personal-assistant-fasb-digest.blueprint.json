@@ -2,80 +2,122 @@
   "flow": [
     {
       "id": 1,
-      "mapper": { "filter": [[{ "a": "chat_id", "o": "exist" }]] },
+      "mapper": {
+        "filter": [
+          [
+            {
+              "a": "chat_id",
+              "o": "exist"
+            }
+          ]
+        ]
+      },
       "module": "datastore:SearchRecord",
       "version": 1,
-      "metadata": { "designer": { "x": 0, "y": 0 } },
-      "parameters": { "datastore": 139287 }
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "datastore": 139287
+      }
     },
     {
       "id": 2,
       "mapper": {
         "filter": [
           [
-            { "a": "assignee_chat_id", "b": "{{1.chat_id}}", "o": "number:equal" },
-            { "a": "status", "b": "done", "o": "text:notequal" },
-            { "a": "due_date", "o": "exist" },
-            { "a": "due_date", "b": "{{addDays(now; 3)}}", "o": "date:lessorequal" }
+            {
+              "a": "assignee_chat_id",
+              "b": "{{1.data.chat_id}}",
+              "o": "number:equal"
+            },
+            {
+              "a": "status",
+              "b": "done",
+              "o": "text:notequal"
+            },
+            {
+              "a": "due_date",
+              "o": "exist"
+            },
+            {
+              "a": "due_date",
+              "b": "{{addDays(now; 3)}}",
+              "o": "date:lessorequal"
+            }
           ]
         ]
       },
       "module": "datastore:SearchRecord",
       "version": 1,
-      "metadata": { "designer": { "x": 300, "y": 0 } },
-      "parameters": { "datastore": 139289 }
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "datastore": 139289
+      }
     },
     {
       "id": 3,
-      "mapper": { "entry": "{{2.task_id}}: {{2.title}} (due {{formatDate(2.due_date; \"YYYY-MM-DD\")}})" },
-      "module": "builtin:BasicAggregator",
-      "version": 1,
-      "metadata": { "designer": { "x": 600, "y": 0 } },
-      "parameters": { "feeder": 2 }
-    },
-    {
-      "id": 4,
       "mapper": {
-        "filter": [
-          [
-            { "a": "public_effective_date", "b": "{{now}}", "o": "date:greaterorequal" },
-            { "a": "public_effective_date", "b": "{{addDays(now; 30)}}", "o": "date:lessorequal" }
-          ]
-        ]
+        "entry": "{{2.data.task_id}}: {{2.data.title}} (due {{formatDate(2.data.due_date; \"YYYY-MM-DD\")}})"
       },
-      "module": "datastore:SearchRecord",
-      "version": 1,
-      "metadata": { "designer": { "x": 300, "y": 150 } },
-      "parameters": { "datastore": 139288 }
-    },
-    {
-      "id": 5,
-      "mapper": { "entry": "ASU {{4.number}}: {{4.title}} (effective {{formatDate(4.public_effective_date; \"YYYY-MM-DD\")}})" },
       "module": "builtin:BasicAggregator",
       "version": 1,
-      "metadata": { "designer": { "x": 600, "y": 150 } },
-      "parameters": { "feeder": 4 }
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "feeder": 2
+      }
     },
     {
       "id": 6,
       "filter": {
         "name": "Has something to report",
         "conditions": [
-          [{ "a": "{{3.array}}", "b": "0", "o": "array:greater" }],
-          [{ "a": "{{5.array}}", "b": "0", "o": "array:greater" }]
+          [
+            {
+              "a": "{{3.array}}",
+              "b": "0",
+              "o": "array:greater"
+            }
+          ]
         ]
       },
       "mapper": {
-        "text": "📋 Daily FASB digest\n\nYour tasks needing attention: {{ifempty(join(map(3.array; \"entry\"); \"; \"); \"none 🎉\")}}\n\nASUs effective within 30 days: {{ifempty(join(map(5.array; \"entry\"); \"; \"); \"none\")}}",
-        "chatId": "{{1.chat_id}}"
+        "text": "📋 Daily task digest\n\nYour tasks needing attention: {{ifempty(join(map(3.array; \"entry\"); \"; \"); \"none 🎉\")}}",
+        "chatId": "{{1.data.chat_id}}"
       },
       "module": "telegram:SendReplyMessage",
       "version": 1,
-      "metadata": { "designer": { "x": 900, "y": 0 } },
-      "parameters": { "__IMTCONN__": 10541339 }
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      },
+      "parameters": {
+        "__IMTCONN__": 10541339
+      }
     }
   ],
-  "name": "Personal Assistant - FASB Digest",
-  "metadata": { "instant": false, "version": 1 },
-  "scheduling": { "type": "daily", "time": "08:00" }
+  "name": "Personal Assistant - Task Digest",
+  "metadata": {
+    "instant": false,
+    "version": 1
+  },
+  "scheduling": {
+    "time": "08:00",
+    "type": "daily"
+  }
 }

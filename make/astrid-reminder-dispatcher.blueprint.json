@@ -6,12 +6,12 @@
         "filter": [
           [
             {
-              "a": "kind",
-              "b": "reminder",
+              "a": "status",
+              "b": "pending",
               "o": "text:equal"
             },
             {
-              "a": "due_at",
+              "a": "remind_at",
               "b": "{{now}}",
               "o": "date:lessorequal"
             }
@@ -27,14 +27,14 @@
         }
       },
       "parameters": {
-        "datastore": 134897
+        "datastore": 140071
       }
     },
     {
       "id": 2,
       "mapper": {
-        "text": "{{1.data.message}}",
-        "chatId": "{{1.data.chat_id}}"
+        "text": "{{1.data.text}}",
+        "chatId": "{{1.data.target_chat_id}}"
       },
       "module": "telegram:SendReplyMessage",
       "version": 1,
@@ -45,7 +45,7 @@
         }
       },
       "parameters": {
-        "__IMTCONN__": 10541339
+        "__IMTCONN__": 10719081
       }
     },
     {
@@ -62,11 +62,11 @@
         }
       },
       "parameters": {
-        "datastore": 134897
+        "datastore": 140071
       }
     }
   ],
-  "name": "Personal Assistant - Reminder Dispatcher",
+  "name": "Astrid - Reminder Dispatcher",
   "metadata": {
     "instant": false,
     "version": 1

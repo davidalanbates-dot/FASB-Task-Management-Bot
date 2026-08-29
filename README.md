@@ -107,3 +107,42 @@ build artifact:
 Do not treat the JSON files under `make/` as something you `npm install`
 and run; they're Make.com scenario blueprints, importable back into Make
 if you ever need to restore or clone the setup.
+
+## Rolling back a change
+
+Every scenario's blueprint lives under `make/` and every version of it is
+in git history — that's the rollback mechanism, there's no separate
+backup system to maintain:
+
+| File | Scenario | ID |
+|---|---|---|
+| `personal-assistant-chat.blueprint.json` | Personal Assistant - Chat | `5997955` |
+| `personal-assistant-reminder-dispatcher.blueprint.json` | Personal Assistant - Reminder Dispatcher | `5998332` |
+| `personal-assistant-fasb-digest.blueprint.json` | Personal Assistant - Task Digest | `6067454` |
+| `astrid-chat.blueprint.json` | Astrid | `6080460` |
+| `astrid-reminder-dispatcher.blueprint.json` | Astrid - Reminder Dispatcher | `6089137` |
+
+To undo a bad change:
+
+1. Find the last-known-good version with `git log -p -- make/<file>` (or
+   `git show <commit>:make/<file>` to view one version without checking
+   it out).
+2. Push that historical blueprint back to the live scenario — via the
+   Make scenario editor (Scenario → ⋮ → Import blueprint, paste the old
+   JSON) or by asking Claude to do it, which calls
+   `scenarios_update` with that scenario ID and the old blueprint content
+   as-is.
+3. Commit the rollback itself as a new commit (don't rewrite history) so
+   the git log stays an honest record of what was actually deployed and
+   when.
+
+This only protects the scenario logic (flow, prompts, routing). It does
+not cover data store contents (facts/tasks/reminders people have already
+saved) or data store *schema* — those aren't part of a blueprint export
+and have no automatic versioning; be careful with destructive data store
+changes separately.
+
+Going forward, every live edit should re-export the changed blueprint(s)
+into `make/` and commit them in the same session as the change (per
+[Editing the live system](#editing-the-live-system) above) — that's what
+keeps this rollback path actually up to date rather than stale.
