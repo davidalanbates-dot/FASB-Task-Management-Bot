@@ -30,21 +30,20 @@ commands needed.
 
 ## System architecture
 
-Four Make.com scenarios, two separate Telegram bot connections:
+Five Make.com scenarios, two separate Telegram bot connections:
 
 | Scenario | Bot | Trigger | Purpose |
 |---|---|---|---|
 | **Personal Assistant - Chat** (`5997955`) | Cherry 2000 | Telegram message (instant) | Main conversation loop: calls Claude, executes whatever action it decides on (remember/remind/cancel/add_task/claim_task/assign_task/update_status), replies |
-| **Personal Assistant - Reminder Dispatcher** (`5998332`) | Cherry 2000 | Scheduled, hourly | Sends any personal reminder whose due time has passed, then deletes it |
+| **Personal Assistant - Reminder Dispatcher** (`5998332`) | Cherry 2000 | Scheduled, every 30 minutes | Sends any personal reminder whose due time has passed, then deletes it |
 | **Personal Assistant - Task Digest** (`6067454`) | Cherry 2000 | Scheduled, daily at 08:00 (org timezone — see note below) | DMs each registered user their FASB tasks due within 3 days (or overdue) |
 | **Astrid** (`6080460`) | Astrid | Telegram message (instant) | Full conversation loop: facts, tasks, and reminders for the sender or a named colleague, directory-based delegation, ownership checks |
+| **Astrid - Reminder Dispatcher** (`6089137`) | Astrid | Scheduled, every 30 minutes | Sends any pending reminder in `Astrid Reminders` whose due time has passed, then deletes it |
 
-> **Known gap:** there is currently no scheduled dispatcher scenario for
-> Astrid's reminders — the `Astrid Reminders` data store holds them, but
-> nothing sends or clears them yet. Cherry 2000's hourly Reminder
-> Dispatcher only reads the `Memory` store, not Astrid's stores. Until a
-> dispatcher scenario is built for Astrid, reminders set through her won't
-> actually fire.
+Both bots' reminder dispatchers now run on the same 30-minute cadence
+(:00 and :30), and both bots' system prompts say so — Cherry 2000 and
+Astrid each tell people reminders go out on that grid rather than
+instantly, so what the bot says matches what actually happens.
 
 > **Timezone note:** the Task Digest is scheduled in the Make
 > organization's account timezone (America/New_York), while both bots'
@@ -86,8 +85,8 @@ is shared between them.
   to a `chat_id`).
 - **Astrid Memory** — facts, scoped per person.
 - **Astrid Tasks** — shared tasks, assignable to any registered user.
-- **Astrid Reminders** — reminders, targetable at any registered user (see
-  the dispatcher gap noted above).
+- **Astrid Reminders** — reminders, targetable at any registered user;
+  cleared by the Astrid - Reminder Dispatcher scenario every 30 minutes.
 - **Astrid Chat History** — recent conversation log per chat, for
   short-term memory.
 
