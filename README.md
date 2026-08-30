@@ -100,22 +100,22 @@ Reminders:
 1. Call the vet — due 2026-08-30 15:00
 ```
 
-Two separate code paths produce this, and they're scoped differently:
+Every message — listing questions included — goes through Claude; there's
+no keyword shortcut anymore. Claude has the full shared task list and the
+sender's own reminders on every turn, and decides scope from what was
+actually asked: defaults to David's own tasks for a general ask ("my
+tasks", "what do I have"), shows someone else's (labeled whose) only when
+named or when the whole team's list is requested. Dates are phrased
+naturally ("today", "tomorrow") rather than raw `YYYY-MM-DD`.
 
-- **Fast path** (keyword shortcut, no Claude call — `my tasks`, `do I have`,
-  `show my`, etc.): always shows the *sender's own* open tasks (assignee
-  match, status ≠ done) and their own reminders. Dates aren't
-  relative-phrased here (Make templates can't reason about "today" the way
-  Claude can) — due dates show as plain `YYYY-MM-DD`.
-- **Claude path** (anything else, including "what's Bob working on" or "what's
-  the whole team got open"): Claude has the full shared task list and
-  decides scope from what was actually asked — defaults to David's own
-  tasks for a general ask, shows someone else's (labeled whose) only when
-  named or when the whole team's list is requested. Claude can phrase dates
-  naturally ("today", "tomorrow").
-
-Both paths use the same numbered-list shape so the format is consistent
-regardless of which one answers.
+(There used to be a fast-path keyword shortcut here that skipped Claude
+entirely for obvious listing questions, matched against the sender's chat
+id directly in a Make filter. It was removed after it was found to return
+stale/incorrect results in a way that couldn't be root-caused — this Make
+plan's execution logs don't expose per-module input/output, so the
+discrepancy between the filter working correctly in isolation and failing
+live was never pinned down. Routing everything through Claude traded a
+small amount of latency for actually being able to trust the answer.)
 
 ## Data model
 
