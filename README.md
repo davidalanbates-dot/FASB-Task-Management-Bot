@@ -85,6 +85,38 @@ enforcement that already existed for single actions, just without a
 per-failure reply. If this ever matters in practice, ask what's actually
 stored (a plain question, not an action) to confirm.
 
+## Listing tasks and reminders (Cherry 2000)
+
+Cherry 2000 shows tasks and reminders as a numbered list:
+
+```
+Here's what's on your plate right now, David:
+
+1. Drive to JB — due today, medium priority, todo
+2. Get Airbnb key — due today, high priority, todo
+3. Rest — no due date, medium priority, todo
+
+Reminders:
+1. Call the vet — due 2026-08-30 15:00
+```
+
+Two separate code paths produce this, and they're scoped differently:
+
+- **Fast path** (keyword shortcut, no Claude call — `my tasks`, `do I have`,
+  `show my`, etc.): always shows the *sender's own* open tasks (assignee
+  match, status ≠ done) and their own reminders. Dates aren't
+  relative-phrased here (Make templates can't reason about "today" the way
+  Claude can) — due dates show as plain `YYYY-MM-DD`.
+- **Claude path** (anything else, including "what's Bob working on" or "what's
+  the whole team got open"): Claude has the full shared task list and
+  decides scope from what was actually asked — defaults to David's own
+  tasks for a general ask, shows someone else's (labeled whose) only when
+  named or when the whole team's list is requested. Claude can phrase dates
+  naturally ("today", "tomorrow").
+
+Both paths use the same numbered-list shape so the format is consistent
+regardless of which one answers.
+
 ## Data model
 
 Cherry 2000 and Astrid use completely separate Make Data Stores — nothing
